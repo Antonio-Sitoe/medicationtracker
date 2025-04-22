@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicationtracker/views/screens/login_screan.dart';
 import 'package:medicationtracker/views/screens/onboarding_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -6,7 +7,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   final seen = prefs.getBool('onboarding_seen') ?? false;
-  runApp(MaterialApp(home: OnboardingScreen()));
+  runApp(MaterialApp(home: LoginScreen()));
 }
 
 class MyApp extends StatelessWidget {
