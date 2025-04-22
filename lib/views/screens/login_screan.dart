@@ -54,14 +54,6 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IconButton(
-                  onPressed:
-                      () => Navigator.pushReplacementNamed(
-                        context,
-                        '/onboarding',
-                      ),
-                  icon: const Icon(Icons.arrow_back),
-                ),
                 const SizedBox(height: 24),
                 const Text(
                   'Bem-vindo de volta',
