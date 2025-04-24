@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:medicationtracker/core/constants/theme_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final onboardingSteps = [
@@ -6,22 +8,19 @@ final onboardingSteps = [
     'title': 'Nunca mais esqueça seus medicamentos',
     'description':
         'Acompanhe seus medicamentos e receba lembretes para tomá-los no horário certo.',
-    'image':
-        'https://images.pexels.com/photos/8942991/pexels-photo-8942991.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    'image': 'assets/onboard/1.png',
   },
   {
     'title': 'Gerencie múltiplos perfis',
     'description':
         'Cuide de seus entes queridos gerenciando seus medicamentos em um único aplicativo.',
-    'image':
-        'https://images.pexels.com/photos/7551605/pexels-photo-7551605.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    'image': 'assets/onboard/2.png',
   },
   {
     'title': 'Acompanhe o histórico de medicamentos',
     'description':
         'Visualize facilmente o histórico de medicamentos tomados e compartilhe com seu médico.',
-    'image':
-        'https://images.pexels.com/photos/7579831/pexels-photo-7579831.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    'image': 'assets/onboard/3.png',
   },
 ];
 
@@ -46,20 +45,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('onboarding_seen', true);
       if (!mounted) return;
-      Navigator.of(context).pushReplacementNamed('/login');
+      GoRouter.of(context).go('/login');
     }
   }
 
   void handleSkip() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_seen', true);
-    if (!mounted) return;
-    Navigator.of(context).pushReplacementNamed('/login');
+
+    if (context.mounted) GoRouter.of(context).go('/login');
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
 
     return Scaffold(
       body: Stack(
@@ -77,12 +77,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   SizedBox(
                     width: size.width,
                     height: size.height,
-                    child: Image.network(step['image']!, fit: BoxFit.cover),
+                    child: Image.asset(
+                      step['image'].toString(),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   Container(
                     width: size.width,
                     height: size.height,
-                    color: Colors.black.withOpacity(0.4),
+                    color: Colors.black.withOpacity(0.5),
                   ),
                   SafeArea(
                     child: Padding(
@@ -105,8 +108,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 decoration: BoxDecoration(
                                   color:
                                       dotIndex == currentStep
-                                          ? Colors.white
-                                          : Colors.white.withOpacity(0.4),
+                                          ? theme.colorScheme.background
+                                          : theme.colorScheme.background
+                                              .withOpacity(0.4),
                                   borderRadius: BorderRadius.circular(5),
                                 ),
                               ),
@@ -115,19 +119,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           const SizedBox(height: 40),
                           Text(
                             step['title']!,
-                            style: const TextStyle(
-                              fontSize: 32,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              color: theme.colorScheme.onPrimary,
+                              fontFamily: AppFontFamily.regular,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
                             ),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             step['description']!,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.white70,
-                              height: 1.5,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onPrimary.withOpacity(
+                                0.7,
+                              ),
+                              height: 1.3,
                             ),
                           ),
                           const SizedBox(height: 40),
@@ -136,17 +141,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             children: [
                               TextButton(
                                 onPressed: handleSkip,
-                                child: const Text(
+                                child: Text(
                                   'Pular',
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 16,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onPrimary
+                                        .withOpacity(0.7),
                                   ),
                                 ),
                               ),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.deepPurple,
+                                  backgroundColor: theme.colorScheme.primary,
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 16,
                                     horizontal: 24,
@@ -162,15 +167,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       currentStep == onboardingSteps.length - 1
                                           ? 'Começar'
                                           : 'Próximo',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color: theme.colorScheme.onPrimary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     ),
                                     const SizedBox(width: 8),
                                     const Icon(
                                       Icons.arrow_forward_ios,
-                                      size: 18,
+                                      size: 15,
+                                      color: AppColors.background,
                                     ),
                                   ],
                                 ),
