@@ -108,8 +108,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 decoration: BoxDecoration(
                                   color:
                                       dotIndex == currentStep
-                                          ? theme.colorScheme.background
-                                          : theme.colorScheme.background
+                                          ? theme.colorScheme.surface
+                                          : theme.colorScheme.surface
                                               .withOpacity(0.4),
                                   borderRadius: BorderRadius.circular(5),
                                 ),

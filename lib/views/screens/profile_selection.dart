@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
 
 final List<Map<String, dynamic>> profiles = [
@@ -21,13 +22,9 @@ final List<Map<String, dynamic>> profiles = [
 ];
 
 class ProfileSelection extends StatelessWidget {
+  const ProfileSelection({super.key});
+
   VoidCallback get onLogout => () {};
-
-  VoidCallback get onAddProfile => () {};
-
-  Function(Map<String, dynamic>) onSelectProfile() {
-    throw UnimplementedError('onSelectProfile is not implemented');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,13 +80,10 @@ class ProfileSelection extends StatelessWidget {
 
                     return GestureDetector(
                       onTap: () {
-                        if (index == 0) {
-                          onSelectProfile();
-                        } else {
-                          onAddProfile();
-                        }
+                        GoRouter.of(context).push('/patient-tabs');
                       },
                       child: Card(
+                        color: AppColors.background,
                         elevation: 4,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),

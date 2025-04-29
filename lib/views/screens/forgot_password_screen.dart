@@ -37,7 +37,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  context.go('/login');
+                  context.push('/login');
                 },
                 child: const Text('OK'),
               ),

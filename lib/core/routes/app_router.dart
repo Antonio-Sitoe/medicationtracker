@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:medicationtracker/views/screens/PatientTabs_tabs/patient_root_layout.dart';
 import 'package:medicationtracker/views/screens/login_screan.dart';
 import 'package:medicationtracker/views/screens/profile_selection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,5 +35,10 @@ final router = GoRouter(
       builder: (_, __) => const ForgotPasswordScreen(),
     ),
     GoRoute(path: '/onboard', builder: (_, __) => const OnboardingScreen()),
+    GoRoute(
+      path: '/patient-tabs',
+      name: 'PatientTabs',
+      builder: (_, __) => PatientRootLayout(),
+    ),
   ],
 );
