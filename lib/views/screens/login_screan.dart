@@ -20,31 +20,12 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
-      showDialog(
-        context: context,
-        builder:
-            (_) => AlertDialog(
-              title: Text(
-                'Erro',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              content: Text(
-                'Por favor, preencha todos os campos.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('OK', style: TextStyle(color: AppColors.primary)),
-                ),
-              ],
-            ),
-      );
       return;
     }
 
     setState(() => _isSubmitting = true);
     await Future.delayed(const Duration(seconds: 2));
+    GoRouter.of(context).push('/profile-selection');
     if (!mounted) return;
     setState(() => _isSubmitting = false);
   }
