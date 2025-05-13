@@ -1,38 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/patient_configuration_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/patient_historys_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/patient_home_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/patient_medication_screen.dart';
 
 class PatientRootLayout extends StatefulWidget {
+  final Widget child;
+
+  const PatientRootLayout({super.key, required this.child});
+
   @override
-  _RootLayoutState createState() => _RootLayoutState();
+  State<PatientRootLayout> createState() => _RootLayoutState();
 }
 
 class _RootLayoutState extends State<PatientRootLayout> {
-  int __selectedIndex = 0;
+  int _selectedIndex = 0;
 
-  final List<Widget> screens = [
-    PatientHomeScreen(),
-    PatientMedicationScreen(),
-    PatientHistorysScreen(),
-    PatientConfigurationScreen(),
+  static const List<String> routes = [
+    '/patient-tabs/home',
+    '/patient-tabs/medications',
+    '/patient-tabs/history',
+    '/patient-tabs/settings',
   ];
 
-  void _navigateBottomBar(int index) {
+  void _onItemTapped(int index) {
     setState(() {
-      __selectedIndex = index;
+      _selectedIndex = index;
     });
+    context.go(routes[index]);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: screens[__selectedIndex],
+      body: widget.child,
+      extendBodyBehindAppBar: true,
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: __selectedIndex,
-        onTap: _navigateBottomBar,
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,
         selectedItemColor: Colors.blue, // Active tab color
@@ -49,8 +50,10 @@ class _RootLayoutState extends State<PatientRootLayout> {
         elevation: 8,
         iconSize: 24,
         showUnselectedLabels: true,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
           BottomNavigationBarItem(
             icon: Icon(Icons.medication),
             label: 'Medicamentos',

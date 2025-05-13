@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
 import 'package:medicationtracker/views/screens/PatientTabs_tabs/upcoming_medication_card.dart';
 
 class PatientHomeScreen extends StatelessWidget {
   double completionRate = 88.0;
+
+  PatientHomeScreen({super.key});
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -101,7 +104,7 @@ Widget _PatientProgressBar(completionRate) {
         const SizedBox(height: 8),
         const Text(
           '2 de 5 medicamentos tomados',
-          style: const TextStyle(fontSize: AppFontSize.xs),
+          style: TextStyle(fontSize: AppFontSize.xs),
         ),
       ],
     ),
@@ -155,7 +158,7 @@ Widget _PatientMedicationToday() {
               ElevatedButton(
                 onPressed: () {},
                 style: ButtonStyle(
-                  padding: MaterialStateProperty.all(
+                  padding: WidgetStateProperty.all(
                     EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                   ),
                 ),
@@ -209,7 +212,7 @@ Widget _PatientHomeHeader(context) {
             icon: const Icon(Icons.person_outline_rounded),
             onPressed: () {},
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(AppColors.gray100),
+              backgroundColor: WidgetStateProperty.all(AppColors.gray100),
             ),
           ),
           SizedBox(width: AppSpacing.xs),
@@ -218,9 +221,11 @@ Widget _PatientHomeHeader(context) {
               IconButton(
                 icon: const Icon(Icons.notifications_none_sharp),
                 iconSize: 24.0,
-                onPressed: () {},
+                onPressed: () {
+                  GoRouter.of(context).push('/notification-screen');
+                },
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(AppColors.gray100),
+                  backgroundColor: WidgetStateProperty.all(AppColors.gray100),
                 ),
               ),
               Positioned(

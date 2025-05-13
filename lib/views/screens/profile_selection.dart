@@ -80,7 +80,7 @@ class ProfileSelection extends StatelessWidget {
 
                     return GestureDetector(
                       onTap: () {
-                        GoRouter.of(context).push('/patient-tabs');
+                        GoRouter.of(context).push('/patient-tabs/home');
                       },
                       child: Card(
                         color: AppColors.background,
