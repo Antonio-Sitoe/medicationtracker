@@ -34,14 +34,21 @@ final ThemeData appTheme = ThemeData(
       fontSize: AppFontSize.xxl,
       fontFamily: AppFontFamily.semibold,
       color: AppColors.text,
+      fontWeight: FontWeight.bold,
     ),
     bodyLarge: TextStyle(
       fontSize: AppFontSize.md,
       fontFamily: AppFontFamily.regular,
       color: AppColors.text,
+      fontWeight: FontWeight.bold,
     ),
     bodyMedium: TextStyle(
       fontSize: AppFontSize.sm,
+      fontFamily: AppFontFamily.regular,
+      color: AppColors.textLight,
+    ),
+    bodySmall: TextStyle(
+      fontSize: AppFontSize.xs,
       fontFamily: AppFontFamily.regular,
       color: AppColors.textLight,
     ),
