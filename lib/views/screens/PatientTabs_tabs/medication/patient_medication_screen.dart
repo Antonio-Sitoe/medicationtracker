@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
 
 class PatientMedicationScreen extends StatelessWidget {
@@ -34,7 +35,7 @@ class PatientMedicationScreen extends StatelessWidget {
         floatingActionButton: FloatingActionButton(
           shape: const CircleBorder(),
           onPressed: () {
-            Navigator.pushNamed(context, '/medications/add');
+            GoRouter.of(context).push('/patient-tabs/medications/add');
           },
           backgroundColor: AppColors.primary,
           child: const Icon(Icons.add, color: Colors.white, size: 24),
@@ -57,114 +58,123 @@ Widget _MedicationList(context) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ...List.generate(8, (index) {
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      offset: Offset(0, 2),
-                      blurRadius: 6,
-                    ),
-                  ],
-                ),
-                child: ListTile(
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 6),
-
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.medical_services_outlined,
-                            color: AppColors.gray600,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Dosagem: 50G',
-                            style: TextStyle(
-                              fontSize: AppFontSize.xs,
-                              fontFamily: AppFontFamily.regular,
-                              color: AppColors.textLight,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today_outlined,
-                            color: AppColors.gray600,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Diario',
-                            style: TextStyle(
-                              fontSize: AppFontSize.xs,
-                              fontFamily: AppFontFamily.regular,
-                              color: AppColors.textLight,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.watch_later_outlined,
-                            color: AppColors.gray600,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '22:00, 8:00',
-                            style: TextStyle(
-                              fontSize: AppFontSize.xs,
-                              fontFamily: AppFontFamily.regular,
-                              color: AppColors.textLight,
-                            ),
-                          ),
-                        ],
+              return GestureDetector(
+                onTap: () {
+                  GoRouter.of(
+                    context,
+                  ).push('/patient-tabs/medications/details');
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black12,
+                        offset: Offset(0, 2),
+                        blurRadius: 6,
                       ),
                     ],
                   ),
-                  title: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Parrasitamol",
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontSize: AppFontSize.md,
-                          fontFamily: AppFontFamily.regular,
-                          color: AppColors.text,
-                          fontWeight: FontWeight.bold,
+                  child: ListTile(
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 6),
+
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.medical_services_outlined,
+                              color: AppColors.gray600,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Dosagem: 50G',
+                              style: TextStyle(
+                                fontSize: AppFontSize.xs,
+                                fontFamily: AppFontFamily.regular,
+                                color: AppColors.textLight,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary, // nova cor de background
-                          borderRadius: BorderRadius.circular(10),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today_outlined,
+                              color: AppColors.gray600,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Diario',
+                              style: TextStyle(
+                                fontSize: AppFontSize.xs,
+                                fontFamily: AppFontFamily.regular,
+                                color: AppColors.textLight,
+                              ),
+                            ),
+                          ],
                         ),
-                        child: Text(
-                          "Activo",
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.watch_later_outlined,
+                              color: AppColors.gray600,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '22:00, 8:00',
+                              style: TextStyle(
+                                fontSize: AppFontSize.xs,
+                                fontFamily: AppFontFamily.regular,
+                                color: AppColors.textLight,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    title: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Parrasitamol",
                           style: Theme.of(
                             context,
-                          ).textTheme.bodySmall?.copyWith(
+                          ).textTheme.bodyLarge?.copyWith(
+                            fontSize: AppFontSize.md,
                             fontFamily: AppFontFamily.regular,
-                            color: Colors.white,
+                            color: AppColors.text,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
-                    ],
+                        Container(
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary, // nova cor de background
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            "Activo",
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(
+                              fontFamily: AppFontFamily.regular,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

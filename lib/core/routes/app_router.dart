@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:medicationtracker/data/models/medication.dart';
 import 'package:medicationtracker/views/screens/PatientTabs_tabs/history/patient_report_screen.dart';
+import 'package:medicationtracker/views/screens/PatientTabs_tabs/medication/add_medication_screen.dart';
+import 'package:medicationtracker/views/screens/PatientTabs_tabs/medication/medication_details_screen.dart';
 import 'package:medicationtracker/views/screens/PatientTabs_tabs/settings/patient_caregivers_screen.dart';
 import 'package:medicationtracker/views/screens/PatientTabs_tabs/settings/patient_configuration_screen.dart';
 import 'package:medicationtracker/views/screens/PatientTabs_tabs/history/patient_historys_screen.dart';
@@ -9,12 +12,25 @@ import 'package:medicationtracker/views/screens/PatientTabs_tabs/medication/pati
 import 'package:medicationtracker/views/screens/PatientTabs_tabs/settings/patient_profile_screen.dart';
 import 'package:medicationtracker/views/screens/PatientTabs_tabs/patient_root_layout.dart';
 import 'package:medicationtracker/views/screens/auth/login_screan.dart';
+import 'package:medicationtracker/views/screens/medication_confirmation.dart';
 import 'package:medicationtracker/views/screens/notification_screen.dart';
 import 'package:medicationtracker/views/screens/profile_selection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:medicationtracker/views/screens/auth/forgot_password_screen.dart';
 import 'package:medicationtracker/views/screens/onboarding_screen.dart';
 import 'package:medicationtracker/views/screens/auth/register_screen.dart';
+
+final medicationExample = Medication(
+  id: 'med-001',
+  name: 'Losartana',
+  dosage: '50mg',
+  frequency: '2', // duas vezes ao dia
+  times: ['08:00', '20:00'],
+  startDate: DateTime(2025, 5, 20),
+  endDate: DateTime(2025, 6, 20),
+  active: true,
+  instructions: 'Tomar após o café da manhã e após o jantar.',
+);
 
 final router = GoRouter(
   initialLocation: '/',
@@ -31,6 +47,10 @@ final router = GoRouter(
     GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
     GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
     GoRoute(path: '/onboard', builder: (_, __) => const OnboardingScreen()),
+    GoRoute(
+      path: '/medication-confirmation',
+      builder: (_, __) => const MedicationConfirmationScreen(),
+    ),
     GoRoute(
       path: '/notification-screen',
       builder: (_, __) => NotificationsScreen(),
@@ -52,6 +72,15 @@ final router = GoRouter(
         GoRoute(
           path: '/patient-tabs/medications',
           builder: (_, __) => PatientMedicationScreen(),
+          routes: [
+            GoRoute(path: 'add', builder: (_, __) => AddMedicationScreen()),
+            GoRoute(
+              path: 'details',
+              builder:
+                  (_, __) =>
+                      MedicationDetailsScreen(medication: medicationExample),
+            ),
+          ],
         ),
         GoRoute(
           path: '/patient-tabs/history',

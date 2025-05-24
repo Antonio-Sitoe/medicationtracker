@@ -1,6 +1,7 @@
 // Flutter version of NotificationsScreen with pixel-perfect structure
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class NotificationItem {
@@ -83,11 +84,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   void _handleNotificationTap(NotificationItem item) {
     if (item.type == 'medication' || item.type == 'reminder') {
-      Navigator.pushNamed(
-        context,
-        '/medication-confirmation',
-        arguments: item.medicationId,
-      );
+      GoRouter.of(context).push('/medication-confirmation');
     }
     setState(() {
       item.read = true;
