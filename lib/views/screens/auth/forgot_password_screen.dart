@@ -71,6 +71,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             Form(
               key: _formKey,
               child: TextFormField(
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontFamily: AppFontFamily.regular,
+                ),
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(

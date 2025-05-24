@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/upcoming_medication_card.dart';
+import 'package:medicationtracker/views/screens/PatientTabs_tabs/medication/upcoming_medication_card.dart';
 
 class PatientHomeScreen extends StatelessWidget {
   double completionRate = 88.0;

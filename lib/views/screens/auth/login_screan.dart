@@ -66,6 +66,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 32),
                           TextFormField(
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontFamily: AppFontFamily.regular,
+                            ),
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             decoration: InputDecoration(
@@ -94,6 +98,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 20),
                           TextFormField(
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontFamily: AppFontFamily.regular,
+                            ),
                             controller: _passwordController,
                             obscureText: !_showPassword,
                             decoration: InputDecoration(

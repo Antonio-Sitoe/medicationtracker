@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -64,9 +65,11 @@ class SettingsScreen extends StatelessWidget {
                     icon: Icons.group,
                     title: 'Gerenciar Perfis',
                     subtitle: 'Pacientes e cuidadores',
-                    onTap:
-                        () =>
-                            Navigator.pushNamed(context, '/settings/caregiver'),
+                    onTap: () {
+                      GoRouter.of(
+                        context,
+                      ).push('/patient-tabs/settings/caregiver');
+                    },
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   _buildSettingGroupTitle('Sobre'),
@@ -154,8 +157,9 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           TextButton(
-            onPressed:
-                () => Navigator.pushNamed(context, '/settings/edit-profile'),
+            onPressed: () {
+              GoRouter.of(context).push('/patient-tabs/settings/profile');
+            },
             style: TextButton.styleFrom(
               backgroundColor: AppColors.gray100,
               padding: const EdgeInsets.symmetric(

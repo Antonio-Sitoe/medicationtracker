@@ -146,6 +146,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildNameField(TextTheme textTheme) {
     return TextFormField(
       controller: _nameController,
+      style: TextStyle(
+        fontWeight: FontWeight.w500,
+        fontFamily: AppFontFamily.regular,
+      ),
       decoration: InputDecoration(
         enabledBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -171,6 +175,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildEmailField(TextTheme textTheme) {
     return TextFormField(
+      style: TextStyle(
+        fontWeight: FontWeight.w500,
+        fontFamily: AppFontFamily.regular,
+      ),
       controller: _emailController,
       decoration: InputDecoration(
         enabledBorder: const OutlineInputBorder(
@@ -201,6 +209,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildPasswordField(TextTheme textTheme) {
     return TextFormField(
+      style: TextStyle(
+        fontWeight: FontWeight.w500,
+        fontFamily: AppFontFamily.regular,
+      ),
       controller: _passwordController,
       obscureText: !_showPassword,
       decoration: InputDecoration(
@@ -237,6 +249,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildConfirmPasswordField(TextTheme textTheme) {
     return TextFormField(
+      style: TextStyle(
+        fontWeight: FontWeight.w500,
+        fontFamily: AppFontFamily.regular,
+      ),
       controller: _confirmPasswordController,
       obscureText: !_showConfirmPassword,
       decoration: InputDecoration(

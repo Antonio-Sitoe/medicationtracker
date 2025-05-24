@@ -196,6 +196,10 @@ Widget _MedicationHeader(context) {
         TextFormField(
           controller: _emailController,
           keyboardType: TextInputType.text,
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontFamily: AppFontFamily.regular,
+          ),
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.search),
             labelText: 'Pesquisar medicamento...',

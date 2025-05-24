@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/patient_configuration_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/patient_historys_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/patient_home_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/patient_medication_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/patient_profile_screen.dart';
+import 'package:medicationtracker/views/screens/PatientTabs_tabs/history/patient_report_screen.dart';
+import 'package:medicationtracker/views/screens/PatientTabs_tabs/settings/patient_caregivers_screen.dart';
+import 'package:medicationtracker/views/screens/PatientTabs_tabs/settings/patient_configuration_screen.dart';
+import 'package:medicationtracker/views/screens/PatientTabs_tabs/history/patient_historys_screen.dart';
+import 'package:medicationtracker/views/screens/PatientTabs_tabs/home/patient_home_screen.dart';
+import 'package:medicationtracker/views/screens/PatientTabs_tabs/medication/patient_medication_screen.dart';
+import 'package:medicationtracker/views/screens/PatientTabs_tabs/settings/patient_profile_screen.dart';
 import 'package:medicationtracker/views/screens/PatientTabs_tabs/patient_root_layout.dart';
-import 'package:medicationtracker/views/screens/login_screan.dart';
+import 'package:medicationtracker/views/screens/auth/login_screan.dart';
 import 'package:medicationtracker/views/screens/notification_screen.dart';
 import 'package:medicationtracker/views/screens/profile_selection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:medicationtracker/views/screens/forgot_password_screen.dart';
+import 'package:medicationtracker/views/screens/auth/forgot_password_screen.dart';
 import 'package:medicationtracker/views/screens/onboarding_screen.dart';
-import 'package:medicationtracker/views/screens/register_screen.dart';
+import 'package:medicationtracker/views/screens/auth/register_screen.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -53,7 +55,10 @@ final router = GoRouter(
         ),
         GoRoute(
           path: '/patient-tabs/history',
-          builder: (_, __) => PatientHistorysScreen(),
+          builder: (_, __) => PatientHistoryScreen(),
+          routes: [
+            GoRoute(path: 'reports', builder: (_, __) => const ReportsScreen()),
+          ],
         ),
         GoRoute(
           path: '/patient-tabs/settings',
@@ -62,6 +67,10 @@ final router = GoRouter(
             GoRoute(
               path: 'profile',
               builder: (_, __) => const ProfileSettingsScreen(),
+            ),
+            GoRoute(
+              path: 'caregiver',
+              builder: (_, __) => const PatientCaregiversScreen(),
             ),
           ],
         ),
