@@ -41,10 +41,18 @@ class AuthViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> register(String email, String password) async {
+  Future<void> register({
+    required String email,
+    required String username,
+    required String password,
+  }) async {
     isLoading = true;
     notifyListeners();
-    await _authService.register(email, password);
+    final UserCredential userCredential = await _authService.register(
+      email,
+      password,
+    );
+    await userCredential.user?.updateDisplayName(username);
     isLoading = false;
     notifyListeners();
   }

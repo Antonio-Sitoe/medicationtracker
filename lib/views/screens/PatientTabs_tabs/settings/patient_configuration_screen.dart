@@ -272,7 +272,7 @@ class PatientConfigurationScreen extends StatelessWidget {
         final auth = Provider.of<AuthViewModel>(context, listen: false);
         await auth.signOut();
       },
-      userName: auth.currentUser?.email.toString() ?? 'Tony',
+      userName: auth.currentUser?.displayName.toString() ?? '---',
       userType: 'caregiver',
       photoUrl: null,
     );

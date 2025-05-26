@@ -6,6 +6,7 @@ import 'package:medicationtracker/viewModels/auth_view_model.dart';
 import 'package:medicationtracker/views/screens/PatientTabs_tabs/home/upcoming_medication_card.dart';
 import 'package:provider/provider.dart';
 
+// ignore: must_be_immutable
 class PatientHomeScreen extends StatelessWidget {
   double completionRate = 88.0;
 
@@ -192,7 +193,7 @@ Widget _PatientHomeHeader(context) {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Olá, ${currentUser?.email}',
+            'Olá, ${currentUser?.displayName ?? 'Usuário'}',
             style: Theme.of(context).textTheme.titleLarge!.copyWith(
               fontWeight: FontWeight.bold,
               fontSize: AppFontSize.md,

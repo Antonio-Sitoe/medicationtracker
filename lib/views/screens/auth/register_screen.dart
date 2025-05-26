@@ -37,8 +37,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       await authViewModel.register(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
+        email: _emailController.text.trim(),
+        username: _nameController.text.trim(),
+        password: _passwordController.text.trim(),
       );
 
       if (!mounted) return;
