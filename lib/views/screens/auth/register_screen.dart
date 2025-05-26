@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
+import 'package:medicationtracker/viewModels/auth_view_model.dart';
+import 'package:provider/provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -23,6 +25,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isSubmitting = false;
 
   Future<void> _handleRegister() async {
+    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
     if (!_formKey.currentState!.validate()) return;
 
     if (_passwordController.text != _confirmPasswordController.text) {
@@ -33,12 +36,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      // Simular chamada de API
-      await Future.delayed(const Duration(seconds: 2));
-      // await register(_nameController.text, _emailController.text, _passwordController.text);
+      await authViewModel.register(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
 
       if (!mounted) return;
-      context.push('/home'); // Redirecionar após registro
     } catch (error) {
       if (!mounted) return;
       _showErrorDialog('Ocorreu um erro durante o cadastro. Tente novamente.');

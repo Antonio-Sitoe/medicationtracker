@@ -187,7 +187,7 @@ Widget _MedicationList(context) {
 }
 
 Widget _MedicationHeader(context) {
-  final _emailController = TextEditingController();
+  final emailController = TextEditingController();
   return Container(
     alignment: Alignment.centerLeft,
     child: Column(
@@ -204,7 +204,7 @@ Widget _MedicationHeader(context) {
         ),
         const SizedBox(height: 16),
         TextFormField(
-          controller: _emailController,
+          controller: emailController,
           keyboardType: TextInputType.text,
           style: TextStyle(
             fontWeight: FontWeight.w500,

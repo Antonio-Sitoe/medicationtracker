@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
+import 'package:medicationtracker/core/services/auth.dart';
+import 'package:medicationtracker/viewModels/auth_view_model.dart';
+import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   final bool isDarkMode;
@@ -261,11 +264,15 @@ class PatientConfigurationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthViewModel>(context, listen: false);
     return SettingsScreen(
       isDarkMode: true,
       toggleTheme: () => print('Trocar tema'),
-      onLogout: () => print('Logout'),
-      userName: 'Tony',
+      onLogout: () async {
+        final auth = Provider.of<AuthViewModel>(context, listen: false);
+        await auth.signOut();
+      },
+      userName: auth.currentUser?.email.toString() ?? 'Tony',
       userType: 'caregiver',
       photoUrl: null,
     );

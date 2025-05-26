@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
+import 'package:medicationtracker/viewModels/auth_view_model.dart';
 import 'package:medicationtracker/views/screens/PatientTabs_tabs/home/upcoming_medication_card.dart';
+import 'package:provider/provider.dart';
 
 class PatientHomeScreen extends StatelessWidget {
   double completionRate = 88.0;
@@ -177,6 +179,8 @@ Widget _PatientMedicationToday() {
 
 Widget _PatientHomeHeader(context) {
   String capitalize(String text) => text[0].toUpperCase() + text.substring(1);
+  final currentUser =
+      Provider.of<AuthViewModel>(context, listen: false).currentUser;
 
   final data = capitalize(
     DateFormat("EEEE, d 'de' MMMM", 'pt_BR').format(DateTime.now()),
@@ -188,7 +192,7 @@ Widget _PatientHomeHeader(context) {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Olá, Antonio Sitoe',
+            'Olá, ${currentUser?.email}',
             style: Theme.of(context).textTheme.titleLarge!.copyWith(
               fontWeight: FontWeight.bold,
               fontSize: AppFontSize.md,

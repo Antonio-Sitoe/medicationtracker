@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
+import 'package:medicationtracker/viewModels/auth_view_model.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,16 +18,15 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _showPassword = false;
 
   Future<void> _handleLogin() async {
+    final auth = Provider.of<AuthViewModel>(context, listen: false);
     final email = _emailController.text;
     final password = _passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
       return;
     }
-
     setState(() => _isSubmitting = true);
-    await Future.delayed(const Duration(seconds: 2));
-    GoRouter.of(context).push('/profile-selection');
+    await auth.signIn(email, password);
     if (!mounted) return;
     setState(() => _isSubmitting = false);
   }

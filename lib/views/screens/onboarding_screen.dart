@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:medicationtracker/viewModels/auth_view_model.dart';
+import 'package:provider/provider.dart';
 
 final onboardingSteps = [
   {
@@ -36,22 +37,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int currentStep = 0;
 
   void handleNext() async {
+    final auth = Provider.of<AuthViewModel>(context, listen: false);
     if (currentStep < onboardingSteps.length - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     } else {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('onboarding_seen', true);
+      await auth.completeOnboarding();
       if (!mounted) return;
       GoRouter.of(context).go('/login');
     }
   }
 
   void handleSkip() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('onboarding_seen', true);
+    final auth = Provider.of<AuthViewModel>(context, listen: false);
+    await auth.completeOnboarding();
 
     if (context.mounted) GoRouter.of(context).go('/login');
   }
