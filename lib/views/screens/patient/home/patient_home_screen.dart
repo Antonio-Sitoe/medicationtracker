@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
 import 'package:medicationtracker/viewModels/auth_view_model.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/home/upcoming_medication_card.dart';
+import 'package:medicationtracker/views/screens/patient/home/upcoming_medication_card.dart';
 import 'package:provider/provider.dart';
 
 // ignore: must_be_immutable

@@ -1,22 +1,21 @@
 import 'package:go_router/go_router.dart';
-import 'package:medicationtracker/app_layout.dart';
 import 'package:medicationtracker/core/routes/app_named_routes.dart';
 import 'package:medicationtracker/core/routes/app_redirect_routes.dart';
 import 'package:medicationtracker/data/models/medication.dart';
 import 'package:medicationtracker/viewModels/auth_view_model.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/history/patient_report_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/medication/add_medication_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/medication/medication_details_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/settings/patient_caregivers_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/settings/patient_configuration_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/history/patient_historys_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/home/patient_home_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/medication/patient_medication_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/settings/patient_profile_screen.dart';
-import 'package:medicationtracker/views/screens/PatientTabs_tabs/patient_root_layout.dart';
-import 'package:medicationtracker/views/screens/auth/login_screan.dart';
+import 'package:medicationtracker/views/screens/patient/history/patient_report_screen.dart';
+import 'package:medicationtracker/views/screens/patient/medication/add_medication_screen.dart';
+import 'package:medicationtracker/views/screens/patient/medication/medication_details_screen.dart';
+import 'package:medicationtracker/views/screens/patient/settings/patient_caregivers_screen.dart';
+import 'package:medicationtracker/views/screens/patient/settings/patient_configuration_screen.dart';
+import 'package:medicationtracker/views/screens/patient/history/patient_historys_screen.dart';
+import 'package:medicationtracker/views/screens/patient/home/patient_home_screen.dart';
+import 'package:medicationtracker/views/screens/patient/medication/patient_medication_screen.dart';
+import 'package:medicationtracker/views/screens/patient/settings/patient_profile_screen.dart';
+import 'package:medicationtracker/views/screens/patient/patient_root_layout.dart';
+import 'package:medicationtracker/views/screens/auth/login.dart';
 import 'package:medicationtracker/views/screens/auth/forgot_password_screen.dart';
-import 'package:medicationtracker/views/screens/auth/register_screen.dart';
+import 'package:medicationtracker/views/screens/auth/register.dart';
 import 'package:medicationtracker/views/screens/onboarding_screen.dart';
 import 'package:medicationtracker/views/screens/medication_confirmation.dart';
 import 'package:medicationtracker/views/screens/notification_screen.dart';
@@ -113,7 +112,7 @@ GoRouter createRouter(AuthViewModel auth) {
             routes: [
               GoRoute(
                 path: 'profile',
-                builder: (_, __) => const ProfileSettingsScreen(),
+                builder: (_, __) => ProfileSettingsScreen(),
               ),
               GoRoute(
                 path: 'caregiver',

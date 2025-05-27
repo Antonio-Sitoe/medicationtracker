@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:medicationtracker/core/constants/theme_constants.dart';
+import 'package:medicationtracker/viewModels/auth_view_model.dart';
+import 'package:medicationtracker/views/widgets/form/button.dart';
+import 'package:medicationtracker/views/widgets/form/input_email.dart';
+import 'package:medicationtracker/views/widgets/snackbar.dart';
+import 'package:provider/provider.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -16,34 +20,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   Future<void> _handleResetPassword() async {
     if (!_formKey.currentState!.validate()) return;
-
+    final auth = Provider.of<AuthViewModel>(context, listen: false);
     setState(() => _isSubmitting = true);
-
-    await Future.delayed(const Duration(seconds: 2));
-
+    final email = _emailController.text;
+    await auth.resetPassword(email);
     setState(() => _isSubmitting = false);
-
     if (!mounted) return;
 
-    showDialog(
+    CustomSnackBar.showSuccess(
       context: context,
-      builder:
-          (_) => AlertDialog(
-            title: const Text('E-mail enviado'),
-            content: const Text(
-              'Verifique sua caixa de entrada para redefinir sua senha.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  context.push('/login');
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          ),
+      title: 'E-mail enviado!',
+      message: 'Verifique sua caixa de entrada para redefinir sua senha.',
     );
+
+    await Future.delayed(const Duration(seconds: 2));
+    context.push('/login');
   }
 
   @override
@@ -56,7 +47,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
-
             Text(
               'Esqueceu sua senha?',
               style: Theme.of(context).textTheme.titleLarge,
@@ -70,41 +60,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
             Form(
               key: _formKey,
-              child: TextFormField(
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontFamily: AppFontFamily.regular,
-                ),
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: 'E-mail',
-                  prefixIcon: const Icon(Icons.email_outlined),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, digite seu e-mail';
-                  }
-                  if (!value.contains('@')) {
-                    return 'Digite um e-mail válido';
-                  }
-                  return null;
-                },
+              child: buildEmailField(
+                _emailController,
+                Theme.of(context).textTheme,
+                'E-mail',
               ),
             ),
             const SizedBox(height: 32),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isSubmitting ? null : _handleResetPassword,
-                child:
-                    _isSubmitting
-                        ? const CircularProgressIndicator(
-                          color: AppColors.white,
-                        )
-                        : const Text('Enviar link de redefinição'),
-              ),
+            buildButton(
+              context: context,
+              onPressed: _handleResetPassword,
+              isLoading: _isSubmitting,
+              label: 'Enviar link de redefinição',
             ),
           ],
         ),
