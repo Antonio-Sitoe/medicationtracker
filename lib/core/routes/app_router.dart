@@ -37,6 +37,7 @@ final medicationExample = Medication(
 GoRouter createRouter(AuthViewModel auth) {
   final router = GoRouter(
     initialLocation: AppNamedRoutes.root,
+    refreshListenable: auth,
     redirect: (context, state) => appRedirectRoutes(state, auth),
     routes: [
       GoRoute(

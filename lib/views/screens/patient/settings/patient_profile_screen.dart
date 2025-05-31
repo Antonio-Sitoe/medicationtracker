@@ -1,31 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:medicationtracker/core/constants/theme_constants.dart';
+import 'package:medicationtracker/viewModels/auth_view_model.dart';
 import 'dart:io';
 
 import 'package:medicationtracker/views/widgets/form/button.dart';
 import 'package:medicationtracker/views/widgets/form/input.dart';
+import 'package:medicationtracker/views/widgets/snackbar.dart';
+import 'package:provider/provider.dart';
 
 class ProfileSettingsScreen extends StatefulWidget {
+  const ProfileSettingsScreen({super.key});
+
   @override
   State<ProfileSettingsScreen> createState() => _ProfileSettingsScreenState();
 }
 
 class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
-  final TextEditingController _nameController = TextEditingController(
-    text: 'João da Silva',
-  );
+  bool isLoading = false;
+  final TextEditingController _nameController = TextEditingController();
   String? photoUri;
   Future<void> _handleSelectProfilePicture() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
     if (pickedFile != null) {
       setState(() => photoUri = pickedFile.path);
     }
   }
 
-  void handleSair() {
-    Navigator.pushReplacementNamed(context, '/login');
+  Future<void> handleSubmit() async {
+    setState(() => isLoading = true);
+
+    final auth = Provider.of<AuthViewModel>(context, listen: false);
+    final name = _nameController.text;
+
+    if (photoUri != null) {
+      await auth.uploadProfileImage(photoUri!);
+    }
+    if (name.isNotEmpty) {
+      await auth.currentUser?.updateDisplayName(name);
+    }
+
+    await auth.reloadUser();
+
+    setState(() {
+      photoUri = auth.currentUser?.photoURL;
+      _nameController.text = auth.currentUser?.displayName ?? '';
+    });
+
+    CustomSnackBar.showSuccess(
+      context: context,
+      title: "Dados atualizados com sucesso",
+      message: '',
+    );
+
+    setState(() => isLoading = false);
+  }
+
+  @override
+  initState() {
+    super.initState();
+    final auth = Provider.of<AuthViewModel>(context, listen: false);
+    final user = auth.currentUser?.displayName;
+
+    _nameController.text = user ?? '';
+    photoUri = auth.currentUser?.photoURL;
+
+    print(photoUri);
   }
 
   @override
@@ -64,13 +105,19 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                         radius: 50,
                         backgroundImage:
                             photoUri != null
-                                ? FileImage(File(photoUri!))
+                                ? photoUri!.startsWith('http')
+                                    ? NetworkImage(photoUri!) as ImageProvider
+                                    : FileImage(File(photoUri!))
                                 : null,
                         child:
                             photoUri == null
                                 ? const Text(
                                   'Selecionar\nFoto',
                                   textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: AppFontFamily.regular,
+                                    fontSize: 13,
+                                  ),
                                 )
                                 : null,
                       ),
@@ -90,8 +137,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               buildButton(
                 label: 'Gravar',
                 context: context,
-                onPressed: () {},
-                isLoading: false,
+                onPressed: handleSubmit,
+                isLoading: isLoading,
               ),
             ],
           ),

@@ -14,16 +14,12 @@ final publicRoutes = [
 String? appRedirectRoutes(GoRouterState state, AuthViewModel auth) {
   final currentRoute = state.matchedLocation;
 
-  if (auth.isLoading) {
-    return currentRoute == AppNamedRoutes.splash ? null : AppNamedRoutes.splash;
+  if (!auth.isAuthenticated && !publicRoutes.contains(currentRoute)) {
+    return AppNamedRoutes.login;
   }
 
   if (!auth.isOnboardingComplete && currentRoute != AppNamedRoutes.onboard) {
     return AppNamedRoutes.onboard;
-  }
-
-  if (!auth.isAuthenticated && !publicRoutes.contains(currentRoute)) {
-    return AppNamedRoutes.login;
   }
 
   if (auth.isAuthenticated && publicRoutes.contains(currentRoute)) {

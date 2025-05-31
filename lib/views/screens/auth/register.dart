@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medicationtracker/viewModels/auth_view_model.dart';
+import 'package:medicationtracker/views/widgets/_show_error_dialog.dart';
 import 'package:medicationtracker/views/widgets/build_header.dart';
 import 'package:medicationtracker/views/widgets/KeyboardAvoidingView.dart';
 import 'package:medicationtracker/views/widgets/form/button.dart';
@@ -32,7 +33,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_passwordController.text != _confirmPasswordController.text) {
-      _showErrorDialog('As senhas não coincidem.');
+      showErrorDialog(context, 'As senhas não coincidem.');
       return;
     }
 
@@ -48,29 +49,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (!mounted) return;
     } catch (error) {
       if (!mounted) return;
-      _showErrorDialog('Ocorreu um erro durante o cadastro. Tente novamente.');
+      showErrorDialog(
+        context,
+        'Ocorreu um erro durante o cadastro. Tente novamente.',
+      );
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
       }
     }
-  }
-
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Erro'),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-    );
   }
 
   @override
