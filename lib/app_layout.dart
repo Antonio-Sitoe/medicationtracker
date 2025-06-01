@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:medicationtracker/core/constants/appTheme.dart';
 import 'package:medicationtracker/core/routes/app_router.dart';
 import 'package:medicationtracker/viewModels/auth_view_model.dart';
+import 'package:medicationtracker/viewModels/medication_view_model.dart';
 
 class AppLayout extends StatefulWidget {
   const AppLayout({super.key});
@@ -29,7 +30,7 @@ class _AppLayoutState extends State<AppLayout> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
-        // ChangeNotifierProvider(create: (_) => MedicationViewModel()),
+        ChangeNotifierProvider(create: (_) => MedicationViewModel()),
         // ChangeNotifierProvider(create: (_) => HistoryViewModel()),
       ],
       child: Builder(

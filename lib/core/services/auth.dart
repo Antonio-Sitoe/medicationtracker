@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:medicationtracker/core/utils/error.dart';
 import 'package:medicationtracker/core/utils/result.dart';
 import 'package:path/path.dart' as path;
 import 'package:firebase_auth/firebase_auth.dart';

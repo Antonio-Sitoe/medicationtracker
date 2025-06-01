@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:medicationtracker/data/models/medication.dart';
+import 'package:medicationtracker/data/models/medication/medication.dart';
 
 class MedicationDetailsScreen extends StatelessWidget {
   final Medication medication;
@@ -37,104 +37,106 @@ class MedicationDetailsScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                medication.name,
-                                style: Theme.of(context).textTheme.titleLarge,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                medication.dosage,
-                                style: TextStyle(color: Colors.grey[600]),
-                              ),
-                            ],
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  medication.active
-                                      ? Colors.green
-                                      : Colors.grey,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              medication.active ? 'Ativo' : 'Inativo',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      _detailRow(
-                        context,
-                        LucideIcons.calendar,
-                        'Frequência:',
-                        medication.frequency,
-                      ),
-                      if (medication.times.isNotEmpty)
-                        _detailRow(
-                          context,
-                          LucideIcons.clock,
-                          'Horários:',
-                          medication.times.join(', '),
-                        ),
-                      _detailRow(
-                        context,
-                        LucideIcons.calendar,
-                        'Início:',
-                        dateFormat.format(medication.startDate),
-                      ),
-                      if (medication.endDate != null)
-                        _detailRow(
-                          context,
-                          LucideIcons.calendar,
-                          'Término:',
-                          dateFormat.format(medication.endDate!),
-                        ),
-                      if (medication.instructions != null &&
-                          medication.instructions!.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(
-                                    LucideIcons.alertCircle,
-                                    size: 20,
-                                    color: Colors.orange,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Instruções',
-                                    style:
-                                        Theme.of(context).textTheme.titleMedium,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                medication.instructions!,
-                                style: TextStyle(color: Colors.grey[600]),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
+                    children: [],
+
+                    // [
+                    //   Row(
+                    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //     children: [
+                    //       Column(
+                    //         crossAxisAlignment: CrossAxisAlignment.start,
+                    //         children: [
+                    //           Text(
+                    //             medication.name,
+                    //             style: Theme.of(context).textTheme.titleLarge,
+                    //           ),
+                    //           const SizedBox(height: 4),
+                    //           Text(
+                    //             medication.dosage,
+                    //             style: TextStyle(color: Colors.grey[600]),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //       Container(
+                    //         padding: const EdgeInsets.symmetric(
+                    //           horizontal: 8,
+                    //           vertical: 4,
+                    //         ),
+                    //         decoration: BoxDecoration(
+                    //           color:
+                    //               medication.active
+                    //                   ? Colors.green
+                    //                   : Colors.grey,
+                    //           borderRadius: BorderRadius.circular(8),
+                    //         ),
+                    //         child: Text(
+                    //           medication.active ? 'Ativo' : 'Inativo',
+                    //           style: const TextStyle(
+                    //             color: Colors.white,
+                    //             fontSize: 12,
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ],
+                    //   ),
+                    //   const SizedBox(height: 16),
+                    //   _detailRow(
+                    //     context,
+                    //     LucideIcons.calendar,
+                    //     'Frequência:',
+                    //     medication.frequency,
+                    //   ),
+                    //   if (medication.times.isNotEmpty)
+                    //     _detailRow(
+                    //       context,
+                    //       LucideIcons.clock,
+                    //       'Horários:',
+                    //       medication.times.join(', '),
+                    //     ),
+                    //   _detailRow(
+                    //     context,
+                    //     LucideIcons.calendar,
+                    //     'Início:',
+                    //     dateFormat.format(medication.startDate),
+                    //   ),
+                    //   if (medication.endDate != null)
+                    //     _detailRow(
+                    //       context,
+                    //       LucideIcons.calendar,
+                    //       'Término:',
+                    //       dateFormat.format(medication.endDate!),
+                    //     ),
+                    //   if (medication.instructions != null &&
+                    //       medication.instructions!.isNotEmpty)
+                    //     Padding(
+                    //       padding: const EdgeInsets.only(top: 16),
+                    //       child: Column(
+                    //         crossAxisAlignment: CrossAxisAlignment.start,
+                    //         children: [
+                    //           Row(
+                    //             children: [
+                    //               const Icon(
+                    //                 LucideIcons.alertCircle,
+                    //                 size: 20,
+                    //                 color: Colors.orange,
+                    //               ),
+                    //               const SizedBox(width: 8),
+                    //               Text(
+                    //                 'Instruções',
+                    //                 style:
+                    //                     Theme.of(context).textTheme.titleMedium,
+                    //               ),
+                    //             ],
+                    //           ),
+                    //           const SizedBox(height: 8),
+                    //           Text(
+                    //             medication.instructions!,
+                    //             style: TextStyle(color: Colors.grey[600]),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //     ),
+                    // ],
                   ),
                 ),
               ),

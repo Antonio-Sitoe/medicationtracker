@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:medicationtracker/viewModels/auth_view_model.dart';
+import 'package:medicationtracker/viewModels/medication_view_model.dart';
+import 'package:provider/provider.dart';
 
 class AddMedicationScreen extends StatefulWidget {
   const AddMedicationScreen({super.key});
@@ -99,6 +102,8 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat("dd 'de' MMMM 'de' yyyy", 'pt_BR');
+    final medication = Provider.of<MedicationViewModel>(context, listen: false);
+    final auth = Provider.of<AuthViewModel>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Adicionar Medicamento')),
@@ -275,9 +280,10 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
             // Botão salvar
             ElevatedButton(
               style: ButtonStyle(alignment: Alignment.topLeft),
-              onPressed: () {
+              onPressed: () async {
+                await medication.create(auth.currentUser!.uid.toString());
                 // Aqui você pode salvar os dados ou chamar um Provider/Service
-                Navigator.pop(context);
+                // Navigator.pop(context);
               },
               child: const Text('Salvar Medicamento'),
             ),

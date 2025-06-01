@@ -1,7 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:medicationtracker/core/routes/app_named_routes.dart';
 import 'package:medicationtracker/core/routes/app_redirect_routes.dart';
-import 'package:medicationtracker/data/models/medication.dart';
+import 'package:medicationtracker/data/models/medication/medication.dart';
 import 'package:medicationtracker/viewModels/auth_view_model.dart';
 import 'package:medicationtracker/views/screens/patient/history/patient_report_screen.dart';
 import 'package:medicationtracker/views/screens/patient/medication/add_medication_screen.dart';
@@ -22,17 +22,17 @@ import 'package:medicationtracker/views/screens/notification_screen.dart';
 import 'package:medicationtracker/views/screens/profile_selection.dart';
 import 'package:medicationtracker/views/screens/splash_screen.dart';
 
-final medicationExample = Medication(
-  id: 'med-001',
-  name: 'Losartana',
-  dosage: '50mg',
-  frequency: '2',
-  times: ['08:00', '20:00'],
-  startDate: DateTime(2025, 5, 20),
-  endDate: DateTime(2025, 6, 20),
-  active: true,
-  instructions: 'Tomar após o café da manhã e após o jantar.',
-);
+// final medicationExample = Medication(
+//   id: 'med-001',
+//   name: 'Losartana',
+//   dosage: '50mg',
+//   frequency: '2',
+//   times: ['08:00', '20:00'],
+//   startDate: DateTime(2025, 5, 20),
+//   endDate: DateTime(2025, 6, 20),
+//   active: true,
+//   instructions: 'Tomar após o café da manhã e após o jantar.',
+// );
 
 GoRouter createRouter(AuthViewModel auth) {
   final router = GoRouter(
@@ -89,12 +89,12 @@ GoRouter createRouter(AuthViewModel auth) {
             builder: (_, __) => PatientMedicationScreen(),
             routes: [
               GoRoute(path: 'add', builder: (_, __) => AddMedicationScreen()),
-              GoRoute(
-                path: 'details',
-                builder:
-                    (_, __) =>
-                        MedicationDetailsScreen(medication: medicationExample),
-              ),
+              // GoRoute(
+              //   path: 'details',
+              //   builder:
+              //       (_, __) =>
+              //           MedicationDetailsScreen(medication: medicationExample),
+              // ),
             ],
           ),
           GoRoute(
