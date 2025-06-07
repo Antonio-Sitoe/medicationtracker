@@ -1,11 +1,9 @@
 import 'package:go_router/go_router.dart';
 import 'package:medicationtracker/core/routes/app_named_routes.dart';
 import 'package:medicationtracker/core/routes/app_redirect_routes.dart';
-import 'package:medicationtracker/data/models/medication/medication.dart';
 import 'package:medicationtracker/viewModels/auth_view_model.dart';
 import 'package:medicationtracker/views/screens/patient/history/patient_report_screen.dart';
-import 'package:medicationtracker/views/screens/patient/medication/add_medication_screen.dart';
-import 'package:medicationtracker/views/screens/patient/medication/medication_details_screen.dart';
+import 'package:medicationtracker/views/screens/patient/medication/add_medication/add_medication_screen.dart';
 import 'package:medicationtracker/views/screens/patient/settings/patient_caregivers_screen.dart';
 import 'package:medicationtracker/views/screens/patient/settings/patient_configuration_screen.dart';
 import 'package:medicationtracker/views/screens/patient/history/patient_historys_screen.dart';

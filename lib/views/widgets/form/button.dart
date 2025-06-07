@@ -11,7 +11,7 @@ Widget buildButton({
   final colorScheme = theme.colorScheme;
   return SizedBox(
     width: double.infinity,
-    height: 60,
+    height: 50,
     child: ElevatedButton(
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
@@ -20,7 +20,14 @@ Widget buildButton({
       ),
       child:
           isLoading
-              ? const CircularProgressIndicator(color: Colors.white)
+              ? const SizedBox(
+                width: 15,
+                height: 15,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  color: Colors.white,
+                ),
+              )
               : Text(
                 label,
                 style: textTheme.bodyLarge?.copyWith(

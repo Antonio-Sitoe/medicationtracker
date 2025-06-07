@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
 import 'package:medicationtracker/viewModels/auth_view_model.dart';
-import 'package:medicationtracker/views/widgets/_show_error_dialog.dart';
 import 'package:medicationtracker/views/widgets/form/button.dart';
 import 'package:medicationtracker/views/widgets/form/input_email.dart';
 import 'package:medicationtracker/views/widgets/form/input_password.dart';
@@ -97,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height: 20), // Espaço no topo
+                            const SizedBox(height: 20),
                             Text(
                               'Bem-vindo de volta',
                               style: theme.textTheme.titleLarge?.copyWith(
@@ -173,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             const SizedBox(height: 24),
                             _createNewAccount(theme),
-                            const SizedBox(height: 20), // Espaço no final
+                            const SizedBox(height: 20),
                           ],
                         ),
                       ),

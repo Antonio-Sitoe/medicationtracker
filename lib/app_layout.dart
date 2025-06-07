@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:medicationtracker/core/constants/appTheme.dart';
 import 'package:medicationtracker/core/routes/app_router.dart';
 import 'package:medicationtracker/viewModels/auth_view_model.dart';
@@ -42,6 +43,12 @@ class _AppLayoutState extends State<AppLayout> {
             debugShowCheckedModeBanner: false,
             theme: appTheme,
             routerConfig: router,
+            localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: [Locale('pt', 'BR')],
           );
         },
       ),

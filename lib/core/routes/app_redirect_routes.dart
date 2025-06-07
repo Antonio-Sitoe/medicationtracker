@@ -23,7 +23,7 @@ String? appRedirectRoutes(GoRouterState state, AuthViewModel auth) {
   }
 
   if (auth.isAuthenticated && publicRoutes.contains(currentRoute)) {
-    return AppNamedRoutes.patientTabsHome;
+    return AppNamedRoutes.patientTabsMedicationsAdd;
   }
 
   return null;
