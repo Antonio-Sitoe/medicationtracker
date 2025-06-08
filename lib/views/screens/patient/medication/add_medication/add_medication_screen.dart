@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:medicationtracker/core/routes/app_named_routes.dart';
+import 'package:medicationtracker/core/services/notifications/notification_service.dart';
 import 'package:medicationtracker/views/widgets/_show_error_dialog.dart';
 import 'package:medicationtracker/views/widgets/form/button.dart';
 import 'package:uuid/uuid.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:medicationtracker/data/models/medication/dosage.dart';
 import 'package:medicationtracker/data/models/medication/frequency.dart';
 import 'package:medicationtracker/data/models/medication/medication.dart';
+
 import 'package:provider/provider.dart';
 import 'package:medicationtracker/viewModels/auth_view_model.dart';
 import 'package:medicationtracker/viewModels/medication_view_model.dart';
@@ -201,6 +203,9 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
         await medication.update(newMedication);
       } else {
         await medication.create(newMedication);
+      }
+      if (newMedication.receiveReminders) {
+        await NotificationService().scheduleAllRemindersFor(newMedication);
       }
       GoRouter.of(context).push(AppNamedRoutes.patientTabsMedications);
     } catch (e) {

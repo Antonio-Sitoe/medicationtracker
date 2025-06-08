@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
+import 'package:medicationtracker/core/services/notifications/notification_service.dart';
 import 'package:medicationtracker/viewModels/auth_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -44,6 +45,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     } else {
+      await NotificationService().requestPermissions();
       await auth.completeOnboarding();
       if (!mounted) return;
       GoRouter.of(context).go('/login');
@@ -52,6 +54,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void handleSkip() async {
     final auth = Provider.of<AuthViewModel>(context, listen: false);
+    await NotificationService().requestPermissions();
     await auth.completeOnboarding();
 
     if (context.mounted) GoRouter.of(context).go('/login');

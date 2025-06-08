@@ -222,8 +222,10 @@ class MedicationDetailsScreen extends StatelessWidget {
                       icon: const Icon(Icons.delete, color: Colors.white),
                       label: const Text('Remover'),
                       onPressed: () {
+                        final parentContext = context;
+
                         showDialog(
-                          context: context,
+                          context: parentContext,
                           builder:
                               (context) => AlertDialog(
                                 title: const Text('Remover medicamento'),
@@ -236,9 +238,12 @@ class MedicationDetailsScreen extends StatelessWidget {
                                     child: const Text('Cancelar'),
                                   ),
                                   TextButton(
-                                    onPressed: () {
-                                      onRemove(context, medication.id);
+                                    onPressed: () async {
                                       Navigator.pop(context);
+                                      await onRemove(
+                                        parentContext,
+                                        medication.id,
+                                      );
                                     },
                                     style: TextButton.styleFrom(
                                       foregroundColor: Colors.red,
