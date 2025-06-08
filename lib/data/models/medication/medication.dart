@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:medicationtracker/data/models/medication/dosage.dart';
 import 'package:medicationtracker/data/models/medication/frequency.dart';
+import 'package:medicationtracker/data/models/medication/status.dart';
+import 'package:medicationtracker/views/widgets/frequancy_formatter.dart';
 
-class Medication {
+class Medication with FrequencyFormatter {
   final String id;
   final String name;
   final String userId;
@@ -28,6 +30,29 @@ class Medication {
     this.endDate,
     required this.receiveReminders,
   });
+
+  String getFormattedFrequency() {
+    return formatFrequency(frequency.type, frequency.specificDays ?? []);
+  }
+
+  MedicationStatus get status {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final start = DateTime(startDate.year, startDate.month, startDate.day);
+
+    if (start.isAfter(today)) {
+      return MedicationStatus.pendente;
+    }
+
+    if (endDate != null) {
+      final end = DateTime(endDate!.year, endDate!.month, endDate!.day);
+      if (end.isBefore(today)) {
+        return MedicationStatus.inactivo;
+      }
+    }
+
+    return MedicationStatus.activo;
+  }
 
   factory Medication.fromJson(Map<String, dynamic> json) {
     return Medication(

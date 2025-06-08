@@ -49,7 +49,17 @@ class MedicationViewModel extends ChangeNotifier {
   }
 
   Future<List<Medication>> findMany() async {
-    final medications = await _repo.findMany();
-    return medications;
+    isLoading = true;
+    notifyListeners();
+    try {
+      final medications = await _repo.findMany();
+      return medications;
+    } catch (e) {
+      print("ERROR  " + e.toString());
+      return [];
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 }

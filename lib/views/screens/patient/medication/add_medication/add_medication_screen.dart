@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:medicationtracker/core/routes/app_named_routes.dart';
 import 'package:medicationtracker/views/widgets/_show_error_dialog.dart';
 import 'package:medicationtracker/views/widgets/form/button.dart';
 import 'package:uuid/uuid.dart';
@@ -196,7 +197,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     print("MEDICAMENTO ${newMedication.toJson()}");
     try {
       await medication.create(newMedication);
-      GoRouter.of(context).pop();
+      GoRouter.of(context).push(AppNamedRoutes.patientTabsMedications);
     } catch (e) {
       showErrorDialog(context, "Falha ao criar medicamento");
       debugPrint("Erro ao criar medicação: $e");

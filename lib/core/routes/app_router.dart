@@ -4,11 +4,12 @@ import 'package:medicationtracker/core/routes/app_redirect_routes.dart';
 import 'package:medicationtracker/viewModels/auth_view_model.dart';
 import 'package:medicationtracker/views/screens/patient/history/patient_report_screen.dart';
 import 'package:medicationtracker/views/screens/patient/medication/add_medication/add_medication_screen.dart';
+import 'package:medicationtracker/views/screens/patient/medication/detail/medication_details_screen.dart';
 import 'package:medicationtracker/views/screens/patient/settings/patient_caregivers_screen.dart';
 import 'package:medicationtracker/views/screens/patient/settings/patient_configuration_screen.dart';
 import 'package:medicationtracker/views/screens/patient/history/patient_historys_screen.dart';
 import 'package:medicationtracker/views/screens/patient/home/patient_home_screen.dart';
-import 'package:medicationtracker/views/screens/patient/medication/patient_medication_screen.dart';
+import 'package:medicationtracker/views/screens/patient/medication/list/patient_medication_screen.dart';
 import 'package:medicationtracker/views/screens/patient/settings/patient_profile_screen.dart';
 import 'package:medicationtracker/views/screens/patient/patient_root_layout.dart';
 import 'package:medicationtracker/views/screens/auth/login.dart';
@@ -19,18 +20,6 @@ import 'package:medicationtracker/views/screens/medication_confirmation.dart';
 import 'package:medicationtracker/views/screens/notification_screen.dart';
 import 'package:medicationtracker/views/screens/profile_selection.dart';
 import 'package:medicationtracker/views/screens/splash_screen.dart';
-
-// final medicationExample = Medication(
-//   id: 'med-001',
-//   name: 'Losartana',
-//   dosage: '50mg',
-//   frequency: '2',
-//   times: ['08:00', '20:00'],
-//   startDate: DateTime(2025, 5, 20),
-//   endDate: DateTime(2025, 6, 20),
-//   active: true,
-//   instructions: 'Tomar após o café da manhã e após o jantar.',
-// );
 
 GoRouter createRouter(AuthViewModel auth) {
   final router = GoRouter(
@@ -87,12 +76,10 @@ GoRouter createRouter(AuthViewModel auth) {
             builder: (_, __) => PatientMedicationScreen(),
             routes: [
               GoRoute(path: 'add', builder: (_, __) => AddMedicationScreen()),
-              // GoRoute(
-              //   path: 'details',
-              //   builder:
-              //       (_, __) =>
-              //           MedicationDetailsScreen(medication: medicationExample),
-              // ),
+              GoRoute(
+                path: 'details',
+                builder: (_, __) => MedicationDetailsScreen(),
+              ),
             ],
           ),
           GoRoute(
