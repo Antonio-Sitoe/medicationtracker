@@ -27,6 +27,9 @@ class MedicationRepository {
   }
 
   Future<void> update(Medication medication) async {
+    if (medication.id == null) {
+      print('ID do medicamento não pode ser nulo');
+    }
     await _collection.doc(medication.id).update(medication.toJson());
   }
 

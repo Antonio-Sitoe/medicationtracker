@@ -155,7 +155,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     }
   }
 
-  Future<void> onSubmit() async {
+  Future<void> onSubmit(bool isEdit, String? id) async {
     setState(() => errorHours = "");
     if (!_formKey.currentState!.validate()) return;
     if (times.toSet().length != times.length) {
@@ -173,9 +173,10 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     final instructions = _instructionsController.text;
     final userId = auth.currentUser?.uid ?? '';
     final uuid = Uuid();
+    final medicationId = isEdit && id != null ? id : uuid.v4();
 
     final newMedication = Medication(
-      id: uuid.v4(),
+      id: medicationId,
       name: name,
       userId: userId,
       instructions: instructions,
@@ -196,7 +197,11 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
     print("MEDICAMENTO ${newMedication.toJson()}");
     try {
-      await medication.create(newMedication);
+      if (isEdit) {
+        await medication.update(newMedication);
+      } else {
+        await medication.create(newMedication);
+      }
       GoRouter.of(context).push(AppNamedRoutes.patientTabsMedications);
     } catch (e) {
       showErrorDialog(context, "Falha ao criar medicamento");
@@ -205,14 +210,60 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = GoRouterState.of(context).extra;
+      if (args is Map<String, dynamic> && args['med'] is Medication) {
+        final med = args['med'] as Medication;
+        setState(() {
+          _nameController.text = med.name;
+          _dosageController.text = med.dosage.quantity.toString();
+          _instructionsController.text = med.instructions ?? '';
+          dosageUnit = med.dosage.unit;
+          frequency = med.frequency.type.toString();
+          times =
+              med.scheduledTimes
+                  .map(
+                    (t) =>
+                        '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}',
+                  )
+                  .toList();
+          startDate = med.startDate;
+
+          if (med.endDate != null) {
+            hasEndDate = true;
+            endDate = med.endDate;
+          }
+
+          selectedDays = med.frequency.specificDays ?? [];
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    Medication? med;
+    final args = GoRouterState.of(context).extra as Map<String, dynamic>?;
+    if (args != null && args.containsKey('med')) {
+      med = args['med'] as Medication?;
+    } else {
+      med = null;
+    }
+
+    final bool isEdit = med != null;
     final medication = Provider.of<MedicationViewModel>(context, listen: true);
     final isLoading = medication.isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: Text("Adicionar medicamento"), elevation: 3),
+      appBar: AppBar(
+        title: Text(isEdit ? "Editar medicamento" : "Adicionar medicamento"),
+        elevation: 3,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -261,7 +312,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
               buildButton(
                 context: context,
                 label: 'Salvar Medicamento',
-                onPressed: onSubmit,
+                onPressed: () => onSubmit(isEdit, med?.id),
                 isLoading: isLoading,
               ),
               const SizedBox(height: 50),
