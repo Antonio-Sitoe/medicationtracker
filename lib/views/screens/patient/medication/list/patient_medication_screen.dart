@@ -24,6 +24,7 @@ class PatientState extends State<PatientMedicationScreen> {
       listen: false,
     );
     final result = await medicationViewModel.findMany();
+    if (!mounted) return;
     setState(() {
       medicationsList = result;
       isLoading = false;

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:medicationtracker/data/models/reminder.dart';
+import 'package:medicationtracker/viewModels/reminder_view_model.dart';
+import 'package:provider/provider.dart';
 
 class MedicationConfirmationScreen extends StatefulWidget {
   const MedicationConfirmationScreen({super.key});
@@ -13,27 +17,40 @@ class _MedicationConfirmationScreenState
     extends State<MedicationConfirmationScreen> {
   bool showNotes = false;
   String notes = '';
+  Reminder? reminder;
 
-  late final medication = {
-    'id': 'dsdsdsdsdsdsd',
-    'name': 'Losartana',
-    'dosage': '50mg',
-    'scheduledTime': '08:00',
-  };
+  void handleConfirmation(bool take) async {
+    if (reminder == null) return;
 
-  void handleConfirmation(bool taken) {
-    print('Medication ${taken ? "taken" : "missed"}');
-    print({
-      'medicationId': medication['id'],
-      'notes': notes,
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    final reminderVm = Provider.of<ReminderViewModel>(context, listen: false);
+
+    await reminderVm.patch(
+      reminder!.id,
+      actionTaken: take ? "take" : "dismissed",
+      respondedAt: DateTime.now(),
+    );
 
     Navigator.pop(context);
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final extra = GoRouterState.of(context).extra;
+    if (extra is Reminder) {
+      setState(() {
+        reminder = extra;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (reminder == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -80,7 +97,7 @@ class _MedicationConfirmationScreenState
                           Icon(LucideIcons.clock, color: Colors.blue[700]),
                           const SizedBox(height: 8),
                           Text(
-                            medication['scheduledTime']!,
+                            "${reminder!.scheduledTime.hour}:${reminder!.scheduledTime.minute.toString().padLeft(2, '0')}",
                             style: const TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
@@ -100,7 +117,7 @@ class _MedicationConfirmationScreenState
                       Column(
                         children: [
                           Text(
-                            medication['name']!,
+                            reminder!.title,
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w600,
@@ -108,7 +125,7 @@ class _MedicationConfirmationScreenState
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            medication['dosage']!,
+                            reminder!.body,
                             style: const TextStyle(
                               fontSize: 18,
                               color: Colors.grey,

@@ -15,11 +15,7 @@ class MedicationRepository {
   }
 
   Future<void> create(Medication medication) async {
-    final docRef = await _collection.add({
-      ...medication.toJson(),
-      'userId': _userId,
-    });
-    await docRef.update({'id': docRef.id});
+    await _collection.add({...medication.toJson(), 'userId': _userId});
   }
 
   Future<void> remove(String id) async {
@@ -27,9 +23,6 @@ class MedicationRepository {
   }
 
   Future<void> update(Medication medication) async {
-    if (medication.id == null) {
-      print('ID do medicamento não pode ser nulo');
-    }
     await _collection.doc(medication.id).update(medication.toJson());
   }
 

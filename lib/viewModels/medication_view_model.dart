@@ -55,7 +55,7 @@ class MedicationViewModel extends ChangeNotifier {
       final medications = await _repo.findMany();
       return medications;
     } catch (e) {
-      print("ERROR  " + e.toString());
+      print("ERROR  $e");
       return [];
     } finally {
       isLoading = false;

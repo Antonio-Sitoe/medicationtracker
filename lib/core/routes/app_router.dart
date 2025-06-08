@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:medicationtracker/app_layout.dart';
 import 'package:medicationtracker/core/routes/app_named_routes.dart';
 import 'package:medicationtracker/core/routes/app_redirect_routes.dart';
 import 'package:medicationtracker/viewModels/auth_view_model.dart';
@@ -23,6 +24,7 @@ import 'package:medicationtracker/views/screens/splash_screen.dart';
 
 GoRouter createRouter(AuthViewModel auth) {
   final router = GoRouter(
+    navigatorKey: navigatorKey,
     initialLocation: AppNamedRoutes.root,
     refreshListenable: auth,
     redirect: (context, state) => appRedirectRoutes(state, auth),

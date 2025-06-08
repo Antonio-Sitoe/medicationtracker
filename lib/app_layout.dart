@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:medicationtracker/core/constants/appTheme.dart';
 import 'package:medicationtracker/core/routes/app_router.dart';
+import 'package:medicationtracker/core/constants/appTheme.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:medicationtracker/viewModels/auth_view_model.dart';
+import 'package:medicationtracker/viewModels/reminder_view_model.dart';
 import 'package:medicationtracker/viewModels/medication_view_model.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class AppLayout extends StatefulWidget {
   const AppLayout({super.key});
@@ -32,6 +35,7 @@ class _AppLayoutState extends State<AppLayout> {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         ChangeNotifierProvider(create: (_) => MedicationViewModel()),
+        ChangeNotifierProvider(create: (_) => ReminderViewModel()),
         // ChangeNotifierProvider(create: (_) => HistoryViewModel()),
       ],
       child: Builder(

@@ -148,9 +148,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     );
 
     if (picked != null) {
-      final formatted = picked.format(context);
       final newTime = TimeOfDay(hour: picked.hour, minute: picked.minute);
-
       setState(() {
         times[index] = newTime.format(context);
       });
@@ -161,6 +159,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     setState(() => errorHours = "");
     if (!_formKey.currentState!.validate()) return;
     if (times.toSet().length != times.length) {
+      if (!mounted) return;
       setState(() {
         errorHours = "Os horários não podem ser repetidos.";
       });
@@ -204,10 +203,10 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       } else {
         await medication.create(newMedication);
       }
+      GoRouter.of(context).push(AppNamedRoutes.patientTabsMedications);
       if (newMedication.receiveReminders) {
         await NotificationService().scheduleAllRemindersFor(newMedication);
       }
-      GoRouter.of(context).push(AppNamedRoutes.patientTabsMedications);
     } catch (e) {
       showErrorDialog(context, "Falha ao criar medicamento");
       debugPrint("Erro ao criar medicação: $e");
