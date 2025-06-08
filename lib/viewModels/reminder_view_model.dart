@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medicationtracker/data/models/reminder.dart';
+import 'package:medicationtracker/data/models/reminder_with_medication.dart';
 import 'package:medicationtracker/data/repositories/reminder_repository.dart';
 
 class ReminderViewModel extends ChangeNotifier {
@@ -67,6 +68,21 @@ class ReminderViewModel extends ChangeNotifier {
       return reminder;
     } catch (e) {
       return [];
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Map<String, List<ReminderWithMedication>>>
+  findManyPastRemindersGroupedByDay() async {
+    isLoading = true;
+    notifyListeners();
+    try {
+      final reminder = await _repo.findManyPastRemindersGroupedByDay();
+      return reminder;
+    } catch (e) {
+      return {};
     } finally {
       isLoading = false;
       notifyListeners();

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:medicationtracker/core/constants/theme_constants.dart';
+import 'package:medicationtracker/data/models/reminder_with_medication.dart';
+import 'package:medicationtracker/viewModels/reminder_view_model.dart';
+import 'package:medicationtracker/views/widgets/skeleton_list.dart';
+import 'package:provider/provider.dart';
 
 class PatientHistoryScreen extends StatefulWidget {
   const PatientHistoryScreen({super.key});
@@ -11,11 +16,27 @@ class PatientHistoryScreen extends StatefulWidget {
 
 class _PatientHistoryScreenState extends State<PatientHistoryScreen> {
   bool sortAscending = false;
+  Map<String, List<ReminderWithMedication>> groupedReminders = {};
+  bool isLoading = true;
+
+  Future<void> getAllReminders() async {
+    final reminder = Provider.of<ReminderViewModel>(context, listen: false);
+    final result = await reminder.findManyPastRemindersGroupedByDay();
+    if (!mounted) return;
+    setState(() {
+      groupedReminders = result;
+      isLoading = false;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     initializeDateFormatting('pt_BR', null);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getAllReminders();
+    });
   }
 
   @override
@@ -27,39 +48,55 @@ class _PatientHistoryScreenState extends State<PatientHistoryScreen> {
           children: [
             _buildHeader(),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _buildDateGroup("Hoje", [
-                    _buildScheduleItem(
-                      "08:00",
-                      "Losartana",
-                      "50mg",
-                      Colors.green,
-                    ),
-                    _buildScheduleItem(
-                      "14:00",
-                      "Atorvastatina",
-                      "20mg",
-                      Colors.orange,
-                    ),
-                  ]),
-                  const SizedBox(height: 16),
-                  _buildDateGroup("Ontem", [
-                    _buildScheduleItem(
-                      "09:00",
-                      "Metformina",
-                      "850mg",
-                      Colors.red,
-                    ),
-                  ]),
-                ],
-              ),
+              child:
+                  isLoading
+                      ? Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        child: skeletonList(),
+                      )
+                      : ListView(
+                        padding: const EdgeInsets.all(16),
+                        children: _buildGroupedList(),
+                      ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  List<Widget> _buildGroupedList() {
+    final sortedKeys =
+        groupedReminders.keys.toList()
+          ..sort((a, b) => sortAscending ? a.compareTo(b) : b.compareTo(a));
+
+    return sortedKeys.map((dateKey) {
+      final reminders = groupedReminders[dateKey]!;
+      final items =
+          reminders.map((r) {
+            final time = r.reminder.scheduledTime;
+            final formattedTime =
+                "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
+            print(r.reminder.actionTaken);
+            return _buildScheduleItem(
+              formattedTime,
+              r.medicationName,
+              "${r.reminder.body}",
+              r.reminder.actionTaken == "take"
+                  ? Colors.green
+                  : r.reminder.actionTaken == "dismissed"
+                  ? Colors.red
+                  : Colors.orange,
+            );
+          }).toList();
+
+      return Column(
+        children: [_buildDateGroup(dateKey, items), const SizedBox(height: 16)],
+      );
+    }).toList();
   }
 
   Widget _buildHeader() {
@@ -120,7 +157,6 @@ class _PatientHistoryScreenState extends State<PatientHistoryScreen> {
             color: Colors.deepPurple.shade50,
             borderRadius: BorderRadius.circular(8),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: Row(
             children: [
               const Icon(

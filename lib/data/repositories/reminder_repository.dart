@@ -1,8 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:medicationtracker/data/models/reminder.dart';
+import 'package:medicationtracker/data/models/reminder_with_medication.dart';
 
 class ReminderRepository {
+  final CollectionReference _medicollection = FirebaseFirestore.instance
+      .collection('medications');
   final CollectionReference _collection = FirebaseFirestore.instance.collection(
     'reminder',
   );
@@ -79,5 +83,73 @@ class ReminderRepository {
     return query.docs
         .map((doc) => Reminder.fromJson(doc.data() as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<Map<String, List<ReminderWithMedication>>>
+  findManyPastRemindersGroupedByDay() async {
+    final now = DateTime.now();
+    final todayDate = DateTime(now.year, now.month, now.day);
+    final nowTime = TimeOfDay.fromDateTime(now);
+
+    // 1. Buscar todos os reminders do usuário (sem filtro de createdAt)
+    final query = await _collection.where('userId', isEqualTo: _userId).get();
+
+    final reminders =
+        query.docs
+            .map(
+              (doc) =>
+                  Reminder.fromJson(doc.data() as Map<String, dynamic>? ?? {}),
+            )
+            .where((reminder) {
+              final createdAt = reminder.createdAt;
+              final reminderDate = DateTime(
+                createdAt.year,
+                createdAt.month,
+                createdAt.day,
+              );
+              final reminderTime = reminder.scheduledTime;
+
+              final isSameOrBeforeToday = !reminderDate.isAfter(todayDate);
+              final isTimeBeforeOrEqualNow =
+                  reminderTime.hour < nowTime.hour ||
+                  (reminderTime.hour == nowTime.hour &&
+                      reminderTime.minute <= nowTime.minute);
+
+              return isSameOrBeforeToday && isTimeBeforeOrEqualNow;
+            })
+            .toList();
+
+    // 2. Buscar os medicamentos relacionados
+    final medicationIds = reminders.map((r) => r.medicationId).toSet();
+
+    final medicationsSnap =
+        await _medicollection
+            .where(FieldPath.documentId, whereIn: medicationIds.toList())
+            .get();
+
+    final medicationMap = {
+      for (var doc in medicationsSnap.docs) doc.id: doc.data(),
+    };
+
+    final reminderWithMedicationList =
+        reminders.map((reminder) {
+          final medicationData =
+              medicationMap[reminder.medicationId] as Map<String, dynamic>?;
+          return ReminderWithMedication(
+            reminder: reminder,
+            medicationName: medicationData?['name'] ?? 'Desconhecido',
+          );
+        }).toList();
+
+    // 3. Agrupar por data
+    final Map<String, List<ReminderWithMedication>> grouped = {};
+    for (var item in reminderWithMedicationList) {
+      final date = item.reminder.createdAt;
+      final dateKey =
+          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+      grouped.putIfAbsent(dateKey, () => []).add(item);
+    }
+
+    return grouped;
   }
 }

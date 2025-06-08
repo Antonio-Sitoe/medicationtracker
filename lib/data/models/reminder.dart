@@ -7,7 +7,8 @@ class Reminder {
   final String body;
   final TimeOfDay scheduledTime;
   final DateTime? respondedAt;
-  final String? actionTaken; // 'take', 'snooze', 'dismissed',
+  final String? actionTaken; // 'take', 'snooze', 'dismissed'
+  final DateTime createdAt;
 
   Reminder({
     required this.id,
@@ -17,7 +18,8 @@ class Reminder {
     required this.scheduledTime,
     this.respondedAt,
     this.actionTaken,
-  });
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -27,6 +29,7 @@ class Reminder {
     'scheduledTime': scheduledTime.toIso8601String(),
     'respondedAt': respondedAt?.toIso8601String(),
     'actionTaken': actionTaken,
+    'createdAt': createdAt.toIso8601String(),
   };
 
   factory Reminder.fromJson(Map<String, dynamic> json) => Reminder(
@@ -40,6 +43,10 @@ class Reminder {
             ? DateTime.parse(json['respondedAt'])
             : null,
     actionTaken: json['actionTaken'],
+    createdAt:
+        json['createdAt'] != null
+            ? DateTime.parse(json['createdAt'])
+            : DateTime.now(),
   );
 }
 
@@ -50,8 +57,7 @@ TimeOfDay _parseTimeOfDay(String timeString) {
   return TimeOfDay(hour: hour, minute: minute);
 }
 
-extension on TimeOfDay {
-  String toIso8601String() {
-    return '$hour:$minute';
-  }
+extension TimeOfDayExtension on TimeOfDay {
+  String toIso8601String() =>
+      '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
 }
