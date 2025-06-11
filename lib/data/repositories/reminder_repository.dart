@@ -20,7 +20,7 @@ class ReminderRepository {
 
   Future<Reminder> create(Reminder reminder) async {
     final docRef =
-        reminder.id != null && reminder.id.isNotEmpty
+        reminder.id.isNotEmpty
             ? _collection.doc(reminder.id)
             : _collection.doc();
 

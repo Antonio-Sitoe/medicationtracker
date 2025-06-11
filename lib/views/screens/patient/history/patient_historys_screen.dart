@@ -87,7 +87,7 @@ class _PatientHistoryScreenState extends State<PatientHistoryScreen> {
             _buildScheduleItem(
               formattedTime,
               r.medicationName,
-              "${r.reminder.body}",
+              r.reminder.body,
               r.reminder.actionTaken == "take"
                   ? Colors.green
                   : r.reminder.actionTaken == "dismissed"
