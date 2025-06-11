@@ -74,15 +74,15 @@ class ReminderViewModel extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, List<ReminderWithMedication>>>
+  Future<List<ReminderWithMedication>>
   findManyPastRemindersGroupedByDay() async {
     isLoading = true;
     notifyListeners();
     try {
-      final reminder = await _repo.findManyPastRemindersGroupedByDay();
+      final reminder = await _repo.findAllRemindersWithMedication();
       return reminder;
     } catch (e) {
-      return {};
+      return [];
     } finally {
       isLoading = false;
       notifyListeners();

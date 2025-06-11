@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:medicationtracker/core/constants/theme_constants.dart';
 import 'package:medicationtracker/data/models/reminder_with_medication.dart';
 import 'package:medicationtracker/viewModels/reminder_view_model.dart';
 import 'package:medicationtracker/views/widgets/skeleton_list.dart';
@@ -16,7 +15,7 @@ class PatientHistoryScreen extends StatefulWidget {
 
 class _PatientHistoryScreenState extends State<PatientHistoryScreen> {
   bool sortAscending = false;
-  Map<String, List<ReminderWithMedication>> groupedReminders = {};
+  List<ReminderWithMedication> reminders = [];
   bool isLoading = true;
 
   Future<void> getAllReminders() async {
@@ -24,7 +23,7 @@ class _PatientHistoryScreenState extends State<PatientHistoryScreen> {
     final result = await reminder.findManyPastRemindersGroupedByDay();
     if (!mounted) return;
     setState(() {
-      groupedReminders = result;
+      reminders = result;
       isLoading = false;
     });
   }
@@ -33,7 +32,6 @@ class _PatientHistoryScreenState extends State<PatientHistoryScreen> {
   void initState() {
     super.initState();
     initializeDateFormatting('pt_BR', null);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getAllReminders();
     });
@@ -59,7 +57,7 @@ class _PatientHistoryScreenState extends State<PatientHistoryScreen> {
                       )
                       : ListView(
                         padding: const EdgeInsets.all(16),
-                        children: _buildGroupedList(),
+                        children: _buildReminderList(),
                       ),
             ),
           ],
@@ -68,20 +66,25 @@ class _PatientHistoryScreenState extends State<PatientHistoryScreen> {
     );
   }
 
-  List<Widget> _buildGroupedList() {
-    final sortedKeys =
-        groupedReminders.keys.toList()
-          ..sort((a, b) => sortAscending ? a.compareTo(b) : b.compareTo(a));
+  List<Widget> _buildReminderList() {
+    final sortedReminders = [...reminders];
+    sortedReminders.sort((a, b) {
+      final aDate = a.reminder.createdAt;
+      final bDate = b.reminder.createdAt;
+      return sortAscending ? aDate.compareTo(bDate) : bDate.compareTo(aDate);
+    });
 
-    return sortedKeys.map((dateKey) {
-      final reminders = groupedReminders[dateKey]!;
-      final items =
-          reminders.map((r) {
-            final time = r.reminder.scheduledTime;
-            final formattedTime =
-                "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
-            print(r.reminder.actionTaken);
-            return _buildScheduleItem(
+    return sortedReminders.map((r) {
+      final time = r.reminder.scheduledTime;
+      final formattedTime =
+          "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
+      final date = r.reminder.createdAt;
+      final formattedDate =
+          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+      return Column(
+        children: [
+          _buildDateGroup(formattedDate, [
+            _buildScheduleItem(
               formattedTime,
               r.medicationName,
               "${r.reminder.body}",
@@ -90,11 +93,10 @@ class _PatientHistoryScreenState extends State<PatientHistoryScreen> {
                   : r.reminder.actionTaken == "dismissed"
                   ? Colors.red
                   : Colors.orange,
-            );
-          }).toList();
-
-      return Column(
-        children: [_buildDateGroup(dateKey, items), const SizedBox(height: 16)],
+            ),
+          ]),
+          const SizedBox(height: 16),
+        ],
       );
     }).toList();
   }

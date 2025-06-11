@@ -85,46 +85,21 @@ class ReminderRepository {
         .toList();
   }
 
-  Future<Map<String, List<ReminderWithMedication>>>
-  findManyPastRemindersGroupedByDay() async {
-    final now = DateTime.now();
-    final todayDate = DateTime(now.year, now.month, now.day);
-    final nowTime = TimeOfDay.fromDateTime(now);
-
-    // 1. Buscar todos os reminders do usuário (sem filtro de createdAt)
+  Future<List<ReminderWithMedication>> findAllRemindersWithMedication() async {
     final query = await _collection.where('userId', isEqualTo: _userId).get();
-
     final reminders =
         query.docs
             .map(
               (doc) =>
                   Reminder.fromJson(doc.data() as Map<String, dynamic>? ?? {}),
             )
-            .where((reminder) {
-              final createdAt = reminder.createdAt;
-              final reminderDate = DateTime(
-                createdAt.year,
-                createdAt.month,
-                createdAt.day,
-              );
-              final reminderTime = reminder.scheduledTime;
-
-              final isSameOrBeforeToday = !reminderDate.isAfter(todayDate);
-              final isTimeBeforeOrEqualNow =
-                  reminderTime.hour < nowTime.hour ||
-                  (reminderTime.hour == nowTime.hour &&
-                      reminderTime.minute <= nowTime.minute);
-
-              return isSameOrBeforeToday && isTimeBeforeOrEqualNow;
-            })
             .toList();
 
-    // 2. Buscar os medicamentos relacionados
-    final medicationIds = reminders.map((r) => r.medicationId).toSet();
+    final medicationIds = reminders.map((r) => r.medicationId).toSet().toList();
 
     final medicationsSnap =
         await _medicollection
-            .where(FieldPath.documentId, whereIn: medicationIds.toList())
+            .where(FieldPath.documentId, whereIn: medicationIds)
             .get();
 
     final medicationMap = {
@@ -141,15 +116,6 @@ class ReminderRepository {
           );
         }).toList();
 
-    // 3. Agrupar por data
-    final Map<String, List<ReminderWithMedication>> grouped = {};
-    for (var item in reminderWithMedicationList) {
-      final date = item.reminder.createdAt;
-      final dateKey =
-          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-      grouped.putIfAbsent(dateKey, () => []).add(item);
-    }
-
-    return grouped;
+    return reminderWithMedicationList;
   }
 }
