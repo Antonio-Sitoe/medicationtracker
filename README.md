@@ -1,32 +1,39 @@
-# MedicationTracker 💊
+# MedicationTracker
 
-Aplicativo mobile desenvolvido em **Flutter** para ajudar pacientes a controlarem seus medicamentos e permitir que cuidadores acompanhem o tratamento em tempo real.
+Aplicativo mobile desenvolvido em **Flutter** para ajudar pacientes a controlarem seus medicamentos e permitir que cuidadores acompanhem o tratamento.
 
-## 🚀 Funcionalidades principais
+## Funcionalidades principais
 
-- Lembretes de medicação com confirmação
-- Vinculação com cuidador via e-mail
-- Histórico de doses tomadas e perdidas
-- Relatórios de adesão ao tratamento
-- Suporte a múltiplos perfis por usuário
+- Lembretes de medicação com confirmação (acções "Tomei" / "Não tomei")
+- Histórico de doses tomadas, perdidas e em atraso
+- Gestão de medicamentos com dosagem, frequência e horários
+- Vinculação local de cuidadores
+- Múltiplos utilizadores no mesmo dispositivo
 
-## 🛠️ Tecnologias
+## Tecnologias
 
 - Flutter + Dart
-- Firebase (Auth, Firestore, Messaging)
-- Provider / Riverpod (gerenciamento de estado)
-- Local Notifications
+- **SQLite local** (`sqflite`) — toda a persistência fica no dispositivo
+- Provider (gestão de estado)
+- `flutter_local_notifications` + `timezone` (lembretes locais)
+- `crypto` (hash SHA-256 das passwords)
 
-## ▶️ Como rodar
+## Estrutura da base de dados
+
+A base de dados local é criada em `medication_tracker.db` no directório de documentos da aplicação. Contém quatro tabelas:
+
+- `users` — utilizadores e respectivos perfis (password com SHA-256)
+- `medications` — medicamentos por utilizador
+- `reminders` — lembretes/confirmações de ingestão (com notas opcionais)
+- `caregivers` — cuidadores associados a cada paciente
+
+## Como rodar
 
 ```bash
 flutter pub get
 flutter run
 ```
 
-```
+## Plataformas
 
-## 📱 Plataformas
-
-- Android ✅
-```
+- Android

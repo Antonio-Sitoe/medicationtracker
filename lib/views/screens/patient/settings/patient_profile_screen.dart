@@ -34,17 +34,18 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     final auth = Provider.of<AuthViewModel>(context, listen: false);
     final name = _nameController.text;
 
-    if (photoUri != null) {
+    if (photoUri != null && !photoUri!.startsWith('http')) {
+      // Apenas faz cópia local quando o caminho é do disco (selecção nova).
       await auth.uploadProfileImage(photoUri!);
     }
     if (name.isNotEmpty) {
-      await auth.currentUser?.updateDisplayName(name);
+      await auth.updateName(name);
     }
 
     await auth.reloadUser();
 
     setState(() {
-      photoUri = auth.currentUser?.photoURL;
+      photoUri = auth.currentUser?.image;
       _nameController.text = auth.currentUser?.displayName ?? '';
     });
 
@@ -64,9 +65,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     final user = auth.currentUser?.displayName;
 
     _nameController.text = user ?? '';
-    photoUri = auth.currentUser?.photoURL;
-
-    print(photoUri);
+    photoUri = auth.currentUser?.image;
   }
 
   @override

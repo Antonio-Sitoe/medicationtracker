@@ -89,7 +89,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   Container(
                     width: size.width,
                     height: size.height,
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                   ),
                   SafeArea(
                     child: Padding(
@@ -114,7 +114,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       dotIndex == currentStep
                                           ? theme.colorScheme.surface
                                           : theme.colorScheme.surface
-                                              .withOpacity(0.4),
+                                              .withValues(alpha: 0.4),
                                   borderRadius: BorderRadius.circular(5),
                                 ),
                               ),
@@ -133,8 +133,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           Text(
                             step['description']!,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onPrimary.withOpacity(
-                                0.7,
+                              color: theme.colorScheme.onPrimary.withValues(
+                                alpha: 0.7,
                               ),
                               height: 1.3,
                             ),
@@ -149,7 +149,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   'Pular',
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: theme.colorScheme.onPrimary
-                                        .withOpacity(0.7),
+                                        .withValues(alpha: 0.7),
                                   ),
                                 ),
                               ),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:medicationtracker/data/models/reminder.dart';
+import 'package:medicationtracker/viewModels/reminder_view_model.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ReportsScreen extends StatefulWidget {
@@ -12,35 +15,49 @@ class _ReportsScreenState extends State<ReportsScreen> {
   String selectedPeriod = '7days';
   bool showPeriodPicker = false;
 
-  final List<Map<String, dynamic>> medicationSchedules =
-      []; // mock or load from provider
+  List<Reminder> _reminders = [];
+  bool _loading = true;
 
-  Map<String, dynamic> calculateAdherence() {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  Future<void> _load() async {
+    final vm = Provider.of<ReminderViewModel>(context, listen: false);
+    final list = await vm.findMany();
+    if (!mounted) return;
+    setState(() {
+      _reminders = list;
+      _loading = false;
+    });
+  }
+
+  Map<String, dynamic> _calculateAdherence() {
     final now = DateTime.now();
-    final startDate =
-        selectedPeriod == '7days'
-            ? now.subtract(const Duration(days: 7))
-            : now.subtract(const Duration(days: 30));
+    final startDate = selectedPeriod == '7days'
+        ? now.subtract(const Duration(days: 7))
+        : now.subtract(const Duration(days: 30));
 
-    final filtered =
-        medicationSchedules.where((schedule) {
-          final date = DateTime.parse(schedule['scheduledTime']);
-          return date.isAfter(startDate) && date.isBefore(now);
-        }).toList();
+    final filtered = _reminders.where((r) {
+      final date = r.createdAt;
+      return date.isAfter(startDate) && date.isBefore(now);
+    }).toList();
 
     final total = filtered.length;
-    final taken = filtered.where((s) => s['status'] == 'taken').length;
-    final missed = filtered.where((s) => s['status'] == 'missed').length;
+    final taken = filtered.where((r) => r.actionTaken == 'take').length;
+    final missed = filtered.where((r) => r.actionTaken == 'dismissed').length;
 
     return {
-      'adherenceRate': total > 0 ? (taken / total) * 100 : 0,
+      'adherenceRate': total > 0 ? (taken / total) * 100 : 0.0,
       'total': total,
       'taken': taken,
       'missed': missed,
     };
   }
 
-  String getPeriodLabel(String period) {
+  String _periodLabel(String period) {
     return switch (period) {
       '7days' => 'Últimos 7 dias',
       '30days' => 'Últimos 30 dias',
@@ -49,12 +66,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
     };
   }
 
-  void handleShare(Map<String, dynamic> stats) async {
+  void _handleShare(Map<String, dynamic> stats) async {
+    final rate = (stats['adherenceRate'] as double).round();
     final text = '''
 Relatório de Medicamentos
 
-Período: ${getPeriodLabel(selectedPeriod)}
-Taxa de adesão: ${stats['adherenceRate'].round()}%
+Período: ${_periodLabel(selectedPeriod)}
+Taxa de adesão: $rate%
 Doses tomadas: ${stats['taken']}
 Doses perdidas: ${stats['missed']}
 Total de doses: ${stats['total']}
@@ -64,156 +82,140 @@ Total de doses: ${stats['total']}
 
   @override
   Widget build(BuildContext context) {
-    final stats = calculateAdherence();
+    final stats = _calculateAdherence();
+    final rate = (stats['adherenceRate'] as double).round();
 
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                    const Text(
-                      'Relatórios',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                // Period Selector
-                Text('Período', style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap:
-                      () =>
-                          setState(() => showPeriodPicker = !showPeriodPicker),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 14,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.calendar_today_outlined,
-                          color: Colors.deepPurple,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(child: Text(getPeriodLabel(selectedPeriod))),
-                        const Icon(Icons.expand_more),
-                      ],
-                    ),
-                  ),
-                ),
-                if (showPeriodPicker)
-                  Column(
-                    children:
-                        ['7days', '30days', 'custom'].map((period) {
-                          final isSelected = selectedPeriod == period;
-                          return ListTile(
-                            title: Text(
-                              getPeriodLabel(period),
-                              style: TextStyle(
-                                color:
-                                    isSelected
-                                        ? Colors.deepPurple
-                                        : Colors.black,
-                              ),
+          child: _loading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                          const Text(
+                            'Relatórios',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
                             ),
-                            trailing:
-                                isSelected
-                                    ? const Icon(
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Período',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: () => setState(
+                          () => showPeriodPicker = !showPeriodPicker,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.calendar_today_outlined,
+                                color: Colors.deepPurple,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(child: Text(_periodLabel(selectedPeriod))),
+                              const Icon(Icons.expand_more),
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (showPeriodPicker)
+                        Column(
+                          children: ['7days', '30days'].map((period) {
+                            final isSelected = selectedPeriod == period;
+                            return ListTile(
+                              title: Text(
+                                _periodLabel(period),
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? Colors.deepPurple
+                                      : Colors.black,
+                                ),
+                              ),
+                              trailing: isSelected
+                                  ? const Icon(
                                       Icons.check,
                                       color: Colors.deepPurple,
                                     )
-                                    : null,
-                            onTap:
-                                () => setState(() {
-                                  selectedPeriod = period;
-                                  showPeriodPicker = false;
-                                }),
-                          );
-                        }).toList(),
-                  ),
-
-                const SizedBox(height: 20),
-
-                // Adherence Card
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(blurRadius: 6, color: Colors.black12),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        '${stats['adherenceRate'].round()}%',
-                        style: const TextStyle(
-                          fontSize: 36,
-                          color: Colors.deepPurple,
-                          fontWeight: FontWeight.bold,
+                                  : null,
+                              onTap: () => setState(() {
+                                selectedPeriod = period;
+                                showPeriodPicker = false;
+                              }),
+                            );
+                          }).toList(),
+                        ),
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: const [
+                            BoxShadow(blurRadius: 6, color: Colors.black12),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              '$rate%',
+                              style: const TextStyle(
+                                fontSize: 36,
+                                color: Colors.deepPurple,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const Text('Taxa de adesão ao tratamento'),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _statColumn('Doses tomadas', stats['taken']),
+                                _statColumn('Doses perdidas', stats['missed']),
+                                _statColumn('Total de doses', stats['total']),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                      const Text('Taxa de adesão ao tratamento'),
                       const SizedBox(height: 20),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _statColumn('Doses tomadas', stats['taken']),
-                          _statColumn('Doses perdidas', stats['missed']),
-                          _statColumn('Total de doses', stats['total']),
+                          _actionButton(
+                            Icons.share,
+                            'Compartilhar',
+                            () => _handleShare(stats),
+                          ),
                         ],
                       ),
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 20),
-
-                // Action Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _actionButton(Icons.picture_as_pdf, 'Exportar PDF', () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Função de exportar em desenvolvimento',
-                          ),
-                        ),
-                      );
-                    }),
-                    _actionButton(
-                      Icons.share,
-                      'Compartilhar',
-                      () => handleShare(stats),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
@@ -243,7 +245,7 @@ Total de doses: ${stats['total']}
           margin: const EdgeInsets.symmetric(horizontal: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.deepPurple.withOpacity(0.05),
+            color: Colors.deepPurple.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(

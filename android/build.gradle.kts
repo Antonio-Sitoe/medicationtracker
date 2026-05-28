@@ -5,7 +5,18 @@ allprojects {
     }
 }
 
-val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
+subprojects {
+    afterEvaluate {
+        extensions.findByName("android")?.let {
+            (it as? com.android.build.gradle.BaseExtension)?.ndkVersion = "27.1.12297006"
+        }
+    }
+}
+
+val newBuildDir: Directory =
+    rootProject.layout.buildDirectory
+        .dir("../../build")
+        .get()
 rootProject.layout.buildDirectory.value(newBuildDir)
 
 subprojects {

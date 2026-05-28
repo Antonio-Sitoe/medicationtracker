@@ -1,54 +1,74 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:medicationtracker/core/services/database/database_helper.dart';
+import 'package:medicationtracker/core/services/session_manager.dart';
 import 'package:medicationtracker/data/models/medication/medication.dart';
 
 class MedicationRepository {
-  final CollectionReference _collection = FirebaseFirestore.instance.collection(
-    'medications',
-  );
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final DatabaseHelper _db = DatabaseHelper.instance;
+  final SessionManager _session = SessionManager.instance;
 
-  String get _userId {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) throw Exception('Usuário não autenticado');
-    return uid;
+  Future<String> _userId() async {
+    final id = await _session.getCurrentUserId();
+    if (id == null) {
+      throw Exception('Utilizador não autenticado');
+    }
+    return id;
   }
 
   Future<void> create(Medication medication) async {
-    await _collection.add({...medication.toJson(), 'userId': _userId});
+    final db = await _db.database;
+    final userId = await _userId();
+    final data = medication.toMap();
+    data['user_id'] = userId;
+    await db.insert('medications', data);
   }
 
   Future<void> remove(String id) async {
-    await _collection.doc(id).delete();
+    final db = await _db.database;
+    await db.delete('medications', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> update(Medication medication) async {
-    await _collection.doc(medication.id).update(medication.toJson());
+    final db = await _db.database;
+    await db.update(
+      'medications',
+      medication.toMap(),
+      where: 'id = ?',
+      whereArgs: [medication.id],
+    );
   }
 
   Future<Medication?> findById(String id) async {
-    final doc = await _collection.doc(id).get();
-    if (!doc.exists) return null;
-    return Medication.fromJson(doc.data() as Map<String, dynamic>);
+    final db = await _db.database;
+    final rows = await db.query(
+      'medications',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return Medication.fromMap(rows.first);
   }
 
   Future<List<Medication>> findByName(String name) async {
-    final query =
-        await _collection
-            .where('userId', isEqualTo: _userId)
-            .where('name', isEqualTo: name)
-            .get();
-
-    return query.docs
-        .map((doc) => Medication.fromJson(doc.data() as Map<String, dynamic>))
-        .toList();
+    final db = await _db.database;
+    final userId = await _userId();
+    final rows = await db.query(
+      'medications',
+      where: 'user_id = ? AND name = ?',
+      whereArgs: [userId, name],
+    );
+    return rows.map(Medication.fromMap).toList();
   }
 
   Future<List<Medication>> findMany() async {
-    final query = await _collection.where('userId', isEqualTo: _userId).get();
-
-    return query.docs
-        .map((doc) => Medication.fromJson(doc.data() as Map<String, dynamic>))
-        .toList();
+    final db = await _db.database;
+    final userId = await _userId();
+    final rows = await db.query(
+      'medications',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+      orderBy: 'name ASC',
+    );
+    return rows.map(Medication.fromMap).toList();
   }
 }

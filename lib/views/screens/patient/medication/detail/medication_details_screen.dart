@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
 import 'package:medicationtracker/core/routes/app_named_routes.dart';
+import 'package:medicationtracker/core/services/notifications/notification_service.dart';
 import 'package:medicationtracker/data/models/medication/medication.dart';
 import 'package:medicationtracker/data/models/medication/status.dart';
 import 'package:medicationtracker/viewModels/medication_view_model.dart';
@@ -15,7 +15,10 @@ class MedicationDetailsScreen extends StatelessWidget {
   Future<void> onRemove(BuildContext context, String id) async {
     final vm = Provider.of<MedicationViewModel>(context, listen: false);
     await vm.remove(id);
-    GoRouter.of(context).push(AppNamedRoutes.patientTabsMedications);
+    // Cancela quaisquer lembretes locais agendados para este medicamento.
+    await NotificationService().cancelAllRemindersFor(id);
+    if (!context.mounted) return;
+    GoRouter.of(context).go(AppNamedRoutes.patientTabsMedications);
   }
 
   @override
@@ -31,7 +34,7 @@ class MedicationDetailsScreen extends StatelessWidget {
         backgroundColor: Colors.grey[50],
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft),
+          icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Detalhes do Medicamento'),
@@ -129,14 +132,14 @@ class MedicationDetailsScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                       _detailRow(
                         context,
-                        LucideIcons.calendar,
+                        Icons.calendar_today,
                         'Frequência:',
                         medication.getFormattedFrequency(),
                       ),
                       if (medication.scheduledTimes.isNotEmpty)
                         _detailRow(
                           context,
-                          LucideIcons.clock,
+                          Icons.access_time,
                           'Horários:',
                           medication.scheduledTimes
                               .map((t) => t.format(context))
@@ -144,14 +147,14 @@ class MedicationDetailsScreen extends StatelessWidget {
                         ),
                       _detailRow(
                         context,
-                        LucideIcons.calendar,
+                        Icons.calendar_today,
                         'Início:',
                         dateFormat.format(medication.startDate),
                       ),
                       if (medication.endDate != null)
                         _detailRow(
                           context,
-                          LucideIcons.calendar,
+                          Icons.calendar_today,
                           'Término:',
                           dateFormat.format(medication.endDate!),
                         ),
@@ -165,7 +168,7 @@ class MedicationDetailsScreen extends StatelessWidget {
                               Row(
                                 children: [
                                   const Icon(
-                                    LucideIcons.alertCircle,
+                                    Icons.info_outline,
                                     size: 20,
                                     color: Colors.orange,
                                   ),

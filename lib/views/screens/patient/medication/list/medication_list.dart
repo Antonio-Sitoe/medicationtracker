@@ -1,7 +1,6 @@
 import 'package:medicationtracker/core/constants/theme_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:medicationtracker/core/routes/app_named_routes.dart';
 import 'package:medicationtracker/data/models/medication/medication.dart';
 import 'package:medicationtracker/data/models/medication/status.dart';
@@ -75,7 +74,7 @@ Widget buildMedicationList(BuildContext context, List<Medication> meds) {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Icon(LucideIcons.pill, size: 20, color: AppColors.gray600),
+                    Icon(Icons.medication_outlined, size: 20, color: AppColors.gray600),
                     const SizedBox(width: 4),
                     Text(
                       "Dosagem: ${med.dosage.quantity} ${med.dosage.unit.name}",
@@ -88,7 +87,7 @@ Widget buildMedicationList(BuildContext context, List<Medication> meds) {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Icon(
-                      LucideIcons.calendar,
+                      Icons.calendar_today,
                       size: 20,
                       color: AppColors.gray600,
                     ),
@@ -100,7 +99,7 @@ Widget buildMedicationList(BuildContext context, List<Medication> meds) {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(LucideIcons.clock, size: 20, color: AppColors.gray600),
+                    Icon(Icons.access_time, size: 20, color: AppColors.gray600),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
@@ -147,7 +146,7 @@ Widget buildMedicationList(BuildContext context, List<Medication> meds) {
                                   color: AppColors.gray200,
                                 ),
                                 child: Icon(
-                                  LucideIcons.alarmClock,
+                                  Icons.alarm,
                                   size: 20,
                                   color: AppColors.gray600,
                                 ),

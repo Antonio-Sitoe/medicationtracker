@@ -1,21 +1,20 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medicationtracker/core/constants/theme_constants.dart';
+import 'package:medicationtracker/core/services/notifications/notification_service.dart';
 import 'package:medicationtracker/viewModels/auth_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class SettingsScreen extends StatelessWidget {
-  final bool isDarkMode;
-  final VoidCallback toggleTheme;
+class _SettingsView extends StatefulWidget {
   final VoidCallback onLogout;
   final String? userName;
   final String? userType;
   final String? photoUrl;
 
-  const SettingsScreen({
-    super.key,
-    required this.isDarkMode,
-    required this.toggleTheme,
+  const _SettingsView({
     required this.onLogout,
     this.userName,
     this.userType,
@@ -23,20 +22,67 @@ class SettingsScreen extends StatelessWidget {
   });
 
   @override
+  State<_SettingsView> createState() => _SettingsViewState();
+}
+
+class _SettingsViewState extends State<_SettingsView> {
+  static const _prefKey = 'notifications_enabled';
+  bool _notificationsEnabled = true;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _notificationsEnabled = prefs.getBool(_prefKey) ?? true;
+      _loaded = true;
+    });
+  }
+
+  Future<void> _toggleNotifications(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_prefKey, value);
+
+    if (!value) {
+      // Ao desligar, cancelamos todos os lembretes agendados.
+      await NotificationService().cancelAllReminders();
+    } else {
+      // Ao religar, reagendamos os existentes.
+      await NotificationService().reScheduleAllReminders();
+    }
+
+    if (!mounted) return;
+    setState(() => _notificationsEnabled = value);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (!_loaded) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return SafeArea(
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Text(
-                'Configurações',
-                style: TextStyle(
-                  fontSize: AppFontSize.xxxl,
-                  fontFamily: AppFontFamily.bold,
-                  color: AppColors.text,
+            const Padding(
+              padding: EdgeInsets.all(AppSpacing.lg),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Configurações',
+                  style: TextStyle(
+                    fontSize: AppFontSize.xxxl,
+                    fontFamily: AppFontFamily.bold,
+                    color: AppColors.text,
+                  ),
                 ),
               ),
             ),
@@ -51,46 +97,43 @@ class SettingsScreen extends StatelessWidget {
                     icon: Icons.notifications,
                     title: 'Notificações',
                     subtitle: 'Lembretes de medicamentos',
-                    value: true,
-                    onChanged: (_) {},
-                  ),
-                  _buildSwitchTile(
-                    icon: Icons.dark_mode,
-                    title: 'Tema Escuro',
-                    subtitle: 'Mudar aparência do app',
-                    value: isDarkMode,
-                    onChanged: (_) => toggleTheme(),
+                    value: _notificationsEnabled,
+                    onChanged: _toggleNotifications,
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   _buildSettingGroupTitle('Perfil e Conta'),
                   _buildNavigationTile(
+                    icon: Icons.person,
+                    title: 'Editar Perfil',
+                    subtitle: 'Nome e foto',
+                    onTap: () =>
+                        GoRouter.of(context).push('/patient-tabs/settings/profile'),
+                  ),
+                  _buildNavigationTile(
                     icon: Icons.group,
-                    title: 'Gerenciar Perfis',
-                    subtitle: 'Pacientes e cuidadores',
-                    onTap: () {
-                      GoRouter.of(
-                        context,
-                      ).push('/patient-tabs/settings/caregiver');
-                    },
+                    title: 'Cuidadores',
+                    subtitle: 'Gerir cuidadores associados',
+                    onTap: () => GoRouter.of(context)
+                        .push('/patient-tabs/settings/caregiver'),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   _buildSettingGroupTitle('Sobre'),
                   _buildNavigationTile(
                     icon: Icons.info,
                     title: 'Sobre o App',
-                    subtitle: 'Versão 1.0.0',
-                    onTap: () {},
+                    subtitle: 'Versão 1.0.0 — base de dados local',
+                    onTap: () => _showAboutDialog(context),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.all(AppSpacing.md),
-                      side: BorderSide(color: AppColors.error.withOpacity(0.3)),
+                      side: BorderSide(color: AppColors.error.withValues(alpha: 0.3)),
                       backgroundColor: AppColors.white,
                     ),
-                    onPressed: onLogout,
-                    icon: Icon(Icons.logout, color: AppColors.error),
-                    label: Text(
+                    onPressed: widget.onLogout,
+                    icon: const Icon(Icons.logout, color: AppColors.error),
+                    label: const Text(
                       'Sair da Conta',
                       style: TextStyle(
                         color: AppColors.error,
@@ -98,6 +141,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: AppSpacing.lg),
                 ],
               ),
             ),
@@ -107,7 +151,26 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  void _showAboutDialog(BuildContext context) {
+    showAboutDialog(
+      context: context,
+      applicationName: 'MedicationTracker',
+      applicationVersion: '1.0.0',
+      applicationLegalese:
+          'Aplicação local para gestão de medicação. '
+          'Todos os dados ficam armazenados no dispositivo (SQLite).',
+    );
+  }
+
   Widget _buildProfileHeader(BuildContext context) {
+    ImageProvider? avatar;
+    final url = widget.photoUrl;
+    if (url != null && url.isNotEmpty) {
+      avatar = url.startsWith('http')
+          ? NetworkImage(url) as ImageProvider
+          : FileImage(File(url));
+    }
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
@@ -119,20 +182,19 @@ class SettingsScreen extends StatelessWidget {
           CircleAvatar(
             radius: 35,
             backgroundColor: AppColors.primaryLight,
-            backgroundImage: photoUrl != null ? NetworkImage(photoUrl!) : null,
-            child:
-                photoUrl == null
-                    ? Text(
-                      userName != null && userName!.isNotEmpty
-                          ? userName![0]
-                          : '?',
-                      style: TextStyle(
-                        fontSize: AppFontSize.xl,
-                        fontFamily: AppFontFamily.bold,
-                        color: AppColors.white,
-                      ),
-                    )
-                    : null,
+            backgroundImage: avatar,
+            child: avatar == null
+                ? Text(
+                    widget.userName != null && widget.userName!.isNotEmpty
+                        ? widget.userName![0].toUpperCase()
+                        : '?',
+                    style: const TextStyle(
+                      fontSize: AppFontSize.xl,
+                      fontFamily: AppFontFamily.bold,
+                      color: AppColors.white,
+                    ),
+                  )
+                : null,
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -140,16 +202,16 @@ class SettingsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  userName ?? 'Usuário',
-                  style: TextStyle(
+                  widget.userName ?? 'Utilizador',
+                  style: const TextStyle(
                     fontSize: AppFontSize.lg,
                     fontFamily: AppFontFamily.semibold,
                     color: AppColors.text,
                   ),
                 ),
                 Text(
-                  userType == 'caregiver' ? 'Cuidador' : 'Paciente',
-                  style: TextStyle(
+                  widget.userType == 'caregiver' ? 'Cuidador' : 'Paciente',
+                  style: const TextStyle(
                     fontSize: AppFontSize.sm,
                     fontFamily: AppFontFamily.regular,
                     color: AppColors.textLight,
@@ -172,7 +234,7 @@ class SettingsScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: Text(
+            child: const Text(
               'Editar',
               style: TextStyle(
                 fontSize: AppFontSize.sm,
@@ -194,7 +256,7 @@ class SettingsScreen extends StatelessWidget {
       ),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: AppFontSize.md,
           fontFamily: AppFontFamily.semibold,
           color: AppColors.textLight,
@@ -218,10 +280,13 @@ class SettingsScreen extends StatelessWidget {
       ),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.primaryLight.withOpacity(0.2),
+          backgroundColor: AppColors.primaryLight.withValues(alpha: 0.2),
           child: Icon(icon, color: AppColors.primary),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
         subtitle: Text(subtitle),
         trailing: Switch.adaptive(
           value: value,
@@ -246,10 +311,13 @@ class SettingsScreen extends StatelessWidget {
       ),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.primaryLight.withOpacity(0.2),
+          backgroundColor: AppColors.primaryLight.withValues(alpha: 0.2),
           child: Icon(icon, color: AppColors.primary),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
         subtitle: Text(subtitle),
         trailing: const Icon(Icons.chevron_right, color: AppColors.gray500),
         onTap: onTap,
@@ -263,17 +331,19 @@ class PatientConfigurationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final auth = Provider.of<AuthViewModel>(context, listen: false);
-    return SettingsScreen(
-      isDarkMode: true,
-      toggleTheme: () => print('Trocar tema'),
+    final auth = Provider.of<AuthViewModel>(context);
+    final user = auth.currentUser;
+    final userType = user != null && user.roles.isNotEmpty
+        ? user.roles.first.name
+        : 'patient';
+
+    return _SettingsView(
       onLogout: () async {
-        final auth = Provider.of<AuthViewModel>(context, listen: false);
         await auth.signOut();
       },
-      userName: auth.currentUser?.displayName.toString() ?? '---',
-      userType: 'caregiver',
-      photoUrl: null,
+      userName: user?.displayName ?? '---',
+      userType: userType,
+      photoUrl: user?.image,
     );
   }
 }

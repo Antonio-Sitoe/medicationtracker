@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:medicationtracker/data/models/reminder.dart';
 import 'package:medicationtracker/viewModels/reminder_view_model.dart';
 import 'package:provider/provider.dart';
@@ -28,6 +27,7 @@ class _MedicationConfirmationScreenState
       reminder!.id,
       actionTaken: take ? "take" : "dismissed",
       respondedAt: DateTime.now(),
+      notes: notes.trim().isEmpty ? null : notes.trim(),
     );
 
     Navigator.pop(context);
@@ -61,7 +61,7 @@ class _MedicationConfirmationScreenState
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(LucideIcons.arrowLeft),
+                    icon: const Icon(Icons.arrow_back_ios_new),
                     onPressed: () => Navigator.pop(context),
                   ),
                   const SizedBox(width: 8),
@@ -82,7 +82,7 @@ class _MedicationConfirmationScreenState
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -94,7 +94,7 @@ class _MedicationConfirmationScreenState
                       // Time
                       Column(
                         children: [
-                          Icon(LucideIcons.clock, color: Colors.blue[700]),
+                          Icon(Icons.access_time, color: Colors.blue[700]),
                           const SizedBox(height: 8),
                           Text(
                             "${reminder!.scheduledTime.hour}:${reminder!.scheduledTime.minute.toString().padLeft(2, '0')}",
@@ -152,7 +152,7 @@ class _MedicationConfirmationScreenState
                               ),
                               onPressed: () => handleConfirmation(true),
                               icon: const Icon(
-                                LucideIcons.check,
+                                Icons.check,
                                 color: Colors.white,
                               ),
                               label: const Text(
@@ -175,7 +175,7 @@ class _MedicationConfirmationScreenState
                               ),
                               onPressed: () => handleConfirmation(false),
                               icon: const Icon(
-                                LucideIcons.x,
+                                Icons.close,
                                 color: Colors.white,
                               ),
                               label: const Text(
@@ -193,7 +193,7 @@ class _MedicationConfirmationScreenState
                       TextButton.icon(
                         onPressed: () => setState(() => showNotes = !showNotes),
                         icon: const Icon(
-                          LucideIcons.messageSquare,
+                          Icons.chat_bubble_outline,
                           color: Colors.blue,
                         ),
                         label: Text(

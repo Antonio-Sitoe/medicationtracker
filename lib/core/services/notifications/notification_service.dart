@@ -28,7 +28,8 @@ class NotificationService {
 
   Future<void> initialize() async {
     tz.initializeTimeZones();
-    final String timeZoneName = await FlutterTimezone.getLocalTimezone();
+    final timeZone = await FlutterTimezone.getLocalTimezone();
+    final String timeZoneName = timeZone.identifier;
     tz.setLocalLocation(tz.getLocation(timeZoneName));
 
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -38,15 +39,15 @@ class NotificationService {
         InitializationSettings(android: initializationSettingsAndroid);
 
     await _notificationsPlugin.initialize(
-      initializationSettings,
+      settings: initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
         final payload = response.payload;
         if (payload == null) return;
 
-        final data = jsonDecode(payload);
-        final reminder = Reminder.fromJson(data['reminder']);
-
-        print("REMINDER ${reminder.toJson()}");
+        final data = jsonDecode(payload) as Map<String, dynamic>;
+        final reminder = Reminder.fromJson(
+          data['reminder'] as Map<String, dynamic>,
+        );
 
         switch (response.actionId) {
           case 'TAKE_MED':
@@ -87,54 +88,53 @@ class NotificationService {
     if (!med.receiveReminders) return;
     await cancelAllRemindersFor(med.id);
 
-    String title = 'Medicação ${med.name}';
-    final body = 'Dosagem: ${med.dosage.quantity} ${med.dosage.unit.name}';
+    final String title = 'Medicação ${med.name}';
+    final String body = 'Dosagem: ${med.dosage.quantity} ${med.dosage.unit.name}';
 
-    String medicationId = med.id;
-    String reminderId = Uuid().v4();
-    final baseId = med.id.hashCode;
+    final medicationId = med.id;
+    final baseId = med.id.hashCode.abs() % 100000;
     final specificDays = med.frequency.specificDays ?? [];
     final List<int> scheduledIds = [];
 
     for (int i = 0; i < med.scheduledTimes.length; i++) {
-      final timeParts = med.scheduledTimes[i];
-      final hour = timeParts.hour;
-      final minute = timeParts.minute;
-      final time = TimeOfDay(hour: hour, minute: minute);
-      final payloadTitle = "$title: ás $hour:$minute 💊⏰";
+      final time = med.scheduledTimes[i];
+      final hourStr = time.hour.toString().padLeft(2, '0');
+      final minStr = time.minute.toString().padLeft(2, '0');
+      final payloadTitle = "$title às $hourStr:$minStr";
+
       if (specificDays.isEmpty) {
-        Reminder reminder = await saveReminder(
+        // 🔁 diário — um Reminder, um agendamento.
+        final reminder = await saveReminder(
           medicationId,
-          reminderId,
+          const Uuid().v4(),
           title,
           time,
           body,
         );
 
-        final payload = jsonEncode({'reminder': reminder});
-        final id = baseId + i;
+        final payload = jsonEncode({'reminder': reminder.toJson()});
+        final id = baseId * 100 + i;
         await scheduleMedicationReminder(
           id: id,
           title: payloadTitle,
           body: body,
           time: time,
-          days: [],
+          days: const [],
           payload: payload,
         );
         scheduledIds.add(id);
       } else {
-        // 📅 Em dias específicos
+        // 📅 dias específicos — um Reminder e um agendamento por (dia, hora).
         for (final weekDay in specificDays) {
-          final id = baseId + i * 10 + weekDay;
-          Reminder reminder = await saveReminder(
+          final reminder = await saveReminder(
             medicationId,
-            reminderId,
+            const Uuid().v4(),
             title,
             time,
             body,
           );
-
-          final payload = jsonEncode({'reminder': reminder});
+          final payload = jsonEncode({'reminder': reminder.toJson()});
+          final id = baseId * 100 + i * 10 + weekDay;
           await scheduleMedicationReminder(
             id: id,
             title: payloadTitle,
@@ -143,11 +143,13 @@ class NotificationService {
             days: [weekDay],
             payload: payload,
           );
+          scheduledIds.add(id);
         }
       }
-
-      await saveScheduledReminderIds(med.id, scheduledIds);
     }
+
+    // Persiste todos os IDs **uma só vez** no fim para permitir cancelamento.
+    await saveScheduledReminderIds(med.id, scheduledIds);
   }
 
   Future<Reminder> saveReminder(
@@ -171,7 +173,7 @@ class NotificationService {
   Future<void> cancelAllRemindersFor(String medicationId) async {
     final ids = await getScheduledReminderIds(medicationId);
     for (final id in ids) {
-      await _notificationsPlugin.cancel(id);
+      await _notificationsPlugin.cancel(id: id);
     }
     await saveScheduledReminderIds(medicationId, []);
   }
@@ -234,11 +236,11 @@ class NotificationService {
     if (days.isEmpty) {
       // 🔁 diário
       await _notificationsPlugin.zonedSchedule(
-        id,
-        title,
-        body,
-        _nextInstance(scheduledDate),
-        notificationDetails,
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: _nextInstance(scheduledDate),
+        notificationDetails: notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
         payload: payload,
@@ -246,11 +248,11 @@ class NotificationService {
     } else {
       for (final day in days) {
         await _notificationsPlugin.zonedSchedule(
-          id,
-          title,
-          body,
-          _nextInstanceOfWeekday(scheduledDate, day),
-          notificationDetails,
+          id: id,
+          title: title,
+          body: body,
+          scheduledDate: _nextInstanceOfWeekday(scheduledDate, day),
+          notificationDetails: notificationDetails,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
           matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
           payload: payload,
@@ -284,7 +286,7 @@ class NotificationService {
   }
 
   Future<void> cancelReminder(int id) async {
-    await _notificationsPlugin.cancel(id);
+    await _notificationsPlugin.cancel(id: id);
   }
 
   Future<void> cancelAllReminders() async {

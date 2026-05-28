@@ -1,16 +1,16 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:medicationtracker/core/services/auth.dart';
 import 'package:medicationtracker/core/utils/result.dart';
+import 'package:medicationtracker/data/models/userModel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthViewModel with ChangeNotifier {
   final AuthService _authService = AuthService();
 
-  User? _currentUser;
+  UserModel? _currentUser;
   bool _isOnboardingComplete = false;
 
-  User? get currentUser => _currentUser;
+  UserModel? get currentUser => _currentUser;
   bool get isAuthenticated => _authService.isAuthenticated;
   bool get isOnboardingComplete => _isOnboardingComplete;
 
@@ -20,6 +20,9 @@ class AuthViewModel with ChangeNotifier {
 
   Future<void> _init() async {
     await _loadOnboardingStatus();
+    await _authService.bootstrap();
+    _currentUser = _authService.currentUser;
+    notifyListeners();
 
     _authService.userStream.listen((user) {
       _currentUser = user;
@@ -28,7 +31,6 @@ class AuthViewModel with ChangeNotifier {
   }
 
   Future<void> reloadUser() async {
-    await _authService.currentUser?.reload();
     _currentUser = _authService.currentUser;
     notifyListeners();
   }
@@ -53,7 +55,6 @@ class AuthViewModel with ChangeNotifier {
   }) async {
     await _authService.register(username, email, password);
     notifyListeners();
-
     await reloadUser();
   }
 
@@ -62,7 +63,7 @@ class AuthViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<Result> signIn(String email, String password) async {
+  Future<Result<UserModel>> signIn(String email, String password) async {
     final result = await _authService.signInWithEmail(email, password);
     notifyListeners();
     return result;
@@ -70,6 +71,11 @@ class AuthViewModel with ChangeNotifier {
 
   Future<void> uploadProfileImage(String path) async {
     await _authService.uploadProfilePicture(path);
+    notifyListeners();
+  }
+
+  Future<void> updateName(String name) async {
+    await _authService.updateUserName(name);
     notifyListeners();
   }
 

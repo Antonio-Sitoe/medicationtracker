@@ -203,13 +203,21 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       } else {
         await medication.create(newMedication);
       }
-      GoRouter.of(context).push(AppNamedRoutes.patientTabsMedications);
-      if (newMedication.receiveReminders) {
-        await NotificationService().scheduleAllRemindersFor(newMedication);
-      }
     } catch (e) {
       showErrorDialog(context, "Falha ao criar medicamento");
       debugPrint("Erro ao criar medicação: $e");
+      return;
+    }
+
+    if (!mounted) return;
+    GoRouter.of(context).push(AppNamedRoutes.patientTabsMedications);
+
+    if (newMedication.receiveReminders) {
+      try {
+        await NotificationService().scheduleAllRemindersFor(newMedication);
+      } catch (e) {
+        debugPrint("Erro ao agendar notificações: $e");
+      }
     }
   }
 

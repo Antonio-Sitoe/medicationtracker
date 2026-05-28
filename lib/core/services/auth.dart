@@ -1,81 +1,193 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+
+import 'package:crypto/crypto.dart';
+import 'package:medicationtracker/core/services/database/database_helper.dart';
+import 'package:medicationtracker/core/services/session_manager.dart';
+import 'package:medicationtracker/core/utils/error.dart';
 import 'package:medicationtracker/core/utils/result.dart';
-import 'package:path/path.dart' as path;
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:medicationtracker/data/models/userModel.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
+/// Serviço de autenticação **local** (SQLite). Substitui o antigo
+/// `FirebaseAuth` mantendo praticamente a mesma API pública para minimizar
+/// alterações nas camadas superiores (`AuthViewModel`).
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
-  Stream<User?> get userStream => _auth.authStateChanges();
+  final DatabaseHelper _db = DatabaseHelper.instance;
+  final SessionManager _session = SessionManager.instance;
 
-  User? get currentUser => _auth.currentUser;
-  bool get isAuthenticated => _auth.currentUser != null;
+  // Stream que avisa ChangeNotifiers sempre que o utilizador muda.
+  final StreamController<UserModel?> _userController =
+      StreamController<UserModel?>.broadcast();
 
-  Future<Result<UserCredential>> signInWithEmail(
+  UserModel? _currentUser;
+
+  Stream<UserModel?> get userStream => _userController.stream;
+  UserModel? get currentUser => _currentUser;
+  bool get isAuthenticated => _currentUser != null;
+
+  /// Deve ser invocado no arranque da app (`main`).
+  Future<void> bootstrap() async {
+    final savedId = await _session.getCurrentUserId();
+    if (savedId == null) {
+      _emit(null);
+      return;
+    }
+    final user = await _findById(savedId);
+    _emit(user);
+  }
+
+  String _hash(String password) {
+    final bytes = utf8.encode(password);
+    return sha256.convert(bytes).toString();
+  }
+
+  Future<UserModel?> _findById(String id) async {
+    final db = await _db.database;
+    final rows = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return UserModel.fromMap(rows.first);
+  }
+
+  Future<UserModel?> _findByEmail(String email) async {
+    final db = await _db.database;
+    final rows = await db.query(
+      'users',
+      where: 'email = ?',
+      whereArgs: [email.trim().toLowerCase()],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return UserModel.fromMap(rows.first);
+  }
+
+  Future<Result<UserModel>> signInWithEmail(
     String email,
     String password,
   ) async {
-    final user = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    return Result(data: user);
-  }
-
-  Future<void> register(String name, String email, String password) async {
-    final UserCredential userCredential = await _auth
-        .createUserWithEmailAndPassword(email: email, password: password);
-    await userCredential.user?.updateDisplayName(name);
-    await updateUserName(name);
-  }
-
-  Future<void> signOut() async {
     try {
-      await _auth.signOut();
+      final user = await _findByEmail(email);
+      if (user == null) {
+        return Result(error: CustomError('Utilizador não encontrado'));
+      }
+      if (user.passwordHash != _hash(password)) {
+        return Result(error: CustomError('Email ou senha incorretos'));
+      }
+
+      await _session.setCurrentUserId(user.id);
+      _emit(user);
+      return Result(data: user);
     } catch (e) {
-      throw Exception('Failed to sign out: $e');
+      return Result(error: CustomError('Falha ao iniciar sessão: $e'));
     }
   }
 
+  Future<void> register(String name, String email, String password) async {
+    final normalized = email.trim().toLowerCase();
+    final existing = await _findByEmail(normalized);
+    if (existing != null) {
+      throw Exception('Já existe um utilizador com este email');
+    }
+
+    final user = UserModel(
+      id: const Uuid().v4(),
+      name: name.trim(),
+      email: normalized,
+      roles: [UserRole.patient],
+      passwordHash: _hash(password),
+    );
+
+    final db = await _db.database;
+    await db.insert('users', user.toMap());
+
+    await _session.setCurrentUserId(user.id);
+    _emit(user);
+  }
+
+  Future<void> signOut() async {
+    await _session.clear();
+    _emit(null);
+  }
+
   Future<void> updateUserName(String name) async {
-    await currentUser?.updateDisplayName(name);
+    final user = _currentUser;
+    if (user == null) return;
+    final db = await _db.database;
+    await db.update(
+      'users',
+      {'name': name},
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
+    _emit(user.copyWith(name: name));
   }
 
   Future<void> deleteAccount(String email, String password) async {
     try {
-      AuthCredential? credential = EmailAuthProvider.credential(
-        email: email,
-        password: password,
-      );
-      await currentUser?.reauthenticateWithCredential(credential);
-      await currentUser?.delete();
+      final user = await _findByEmail(email);
+      if (user == null) {
+        throw Exception('Utilizador não encontrado');
+      }
+      if (user.passwordHash != _hash(password)) {
+        throw Exception('Email ou senha incorretos');
+      }
+      final db = await _db.database;
+      await db.delete('users', where: 'id = ?', whereArgs: [user.id]);
       await signOut();
     } catch (e) {
-      throw Exception('Failed to delete account: $e');
+      throw Exception('Falha ao apagar conta: $e');
     }
   }
 
+  /// Sem servidor de email, esta operação local apenas valida que o email
+  /// existe. A reposição efectiva é feita manualmente em
+  /// [resetPasswordFromCurrentPassword].
   Future<void> resetPassword(String email) async {
-    try {
-      await _auth.sendPasswordResetEmail(email: email);
-    } catch (e) {
-      throw Exception('Failed to reset password: $e');
+    final user = await _findByEmail(email);
+    if (user == null) {
+      throw Exception('Email não está registado neste dispositivo');
     }
   }
 
+  /// Copia a foto seleccionada para o directório de documentos da app e
+  /// guarda o caminho local na tabela `users`. Antes ia para Firebase Storage.
   Future<String?> uploadProfilePicture(String photoPath) async {
     try {
-      final File file = File(photoPath);
-      final fileName = path.basename(photoPath);
-      final userId = currentUser?.uid;
+      final user = _currentUser;
+      if (user == null) {
+        throw Exception('Sem sessão activa');
+      }
 
-      final ref = _storage.ref().child('profile_pictures/$userId/$fileName');
-      await ref.putFile(file);
-      final imageUrl = await ref.getDownloadURL();
-      return imageUrl;
+      final docsDir = await getApplicationDocumentsDirectory();
+      final profileDir = Directory(p.join(docsDir.path, 'profile_pictures'));
+      if (!await profileDir.exists()) {
+        await profileDir.create(recursive: true);
+      }
+
+      final ext = p.extension(photoPath);
+      final destination = p.join(profileDir.path, '${user.id}$ext');
+      final saved = await File(photoPath).copy(destination);
+
+      final db = await _db.database;
+      await db.update(
+        'users',
+        {'image': saved.path},
+        where: 'id = ?',
+        whereArgs: [user.id],
+      );
+
+      _emit(user.copyWith(image: saved.path));
+      return saved.path;
     } catch (e) {
-      throw Exception('Erro ao fazer upload da imagem: $e');
+      throw Exception('Erro ao guardar imagem: $e');
     }
   }
 
@@ -84,15 +196,24 @@ class AuthService {
     String newPassword,
     String email,
   ) async {
-    try {
-      AuthCredential credential = EmailAuthProvider.credential(
-        email: email,
-        password: currentPassword,
-      );
-      await currentUser?.reauthenticateWithCredential(credential);
-      await currentUser?.updatePassword(newPassword);
-    } catch (e) {
-      throw Exception('Failed to reset password from current password: $e');
+    final user = await _findByEmail(email);
+    if (user == null) {
+      throw Exception('Utilizador não encontrado');
     }
+    if (user.passwordHash != _hash(currentPassword)) {
+      throw Exception('Senha actual incorrecta');
+    }
+    final db = await _db.database;
+    await db.update(
+      'users',
+      {'password_hash': _hash(newPassword)},
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
+  }
+
+  void _emit(UserModel? user) {
+    _currentUser = user;
+    _userController.add(user);
   }
 }

@@ -11,8 +11,14 @@ class ReminderViewModel extends ChangeNotifier {
     String id, {
     DateTime? respondedAt,
     String? actionTaken,
+    String? notes,
   }) async {
-    await _repo.patch(id, actionTaken: actionTaken, respondedAt: respondedAt);
+    await _repo.patch(
+      id,
+      actionTaken: actionTaken,
+      respondedAt: respondedAt,
+      notes: notes,
+    );
   }
 
   Future<void> create(Reminder reminder) async {
